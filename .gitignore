@@ -31,7 +31,8 @@ default_bus_layout.tres
 export.cfg
 export_presets.cfg
 game_imports
-
+/debug
+/export
 history.cfg
 
 history.txt
