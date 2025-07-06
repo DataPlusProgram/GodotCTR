@@ -1,0 +1,338 @@
+[gd_scene load_steps=7 format=3 uid="uid://cy5ev7l3hdosn"]
+
+[ext_resource type="Script" uid="uid://cot60mnxp5kl3" path="res://test.gd" id="1_qih2i"]
+[ext_resource type="PackedScene" uid="uid://c86ca8w5tvtxl" path="res://addons/gameAssetImporter/scenes/orbCam/orbCam.tscn" id="1_vfvc6"]
+[ext_resource type="PackedScene" uid="uid://db2gn5nk6t2yr" path="res://addons/ctr/CTR_Loader.tscn" id="3_sth5e"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_vfvc6"]
+sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+
+[sub_resource type="Sky" id="Sky_qih2i"]
+sky_material = SubResource("ProceduralSkyMaterial_vfvc6")
+
+[sub_resource type="Environment" id="Environment_sth5e"]
+background_mode = 2
+sky = SubResource("Sky_qih2i")
+tonemap_mode = 2
+fog_mode = 1
+fog_light_energy = 3.06
+fog_density = 1.0
+fog_aerial_perspective = 0.067
+adjustment_enabled = true
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_qih2i")
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MenuBar" type="MenuBar" parent="VBoxContainer2"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 28.61)
+layout_mode = 2
+
+[node name="Panel" type="Panel" parent="VBoxContainer2/MenuBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MenuButton" type="MenuButton" parent="VBoxContainer2/MenuBar"]
+unique_name_in_owner = true
+clip_contents = true
+layout_mode = 0
+offset_right = 68.0
+offset_bottom = 31.0
+text = "Open"
+item_count = 4
+popup/item_0/text = "ISO"
+popup/item_0/id = 0
+popup/item_1/id = 1
+popup/item_1/separator = true
+popup/item_2/text = "Save to Lev"
+popup/item_2/id = 2
+popup/item_3/text = "Overwrite current ISO"
+popup/item_3/id = 3
+
+[node name="HSplitContainer" type="HSplitContainer" parent="VBoxContainer2"]
+layout_mode = 2
+size_flags_vertical = 3
+split_offset = 3070
+
+[node name="ViewportContainer" type="SubViewportContainer" parent="VBoxContainer2/HSplitContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="VBoxContainer2/HSplitContainer/ViewportContainer"]
+unique_name_in_owner = true
+handle_input_locally = false
+size = Vector2i(793, 616)
+render_target_update_mode = 4
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="VBoxContainer2/HSplitContainer/ViewportContainer/SubViewport"]
+environment = SubResource("Environment_sth5e")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="VBoxContainer2/HSplitContainer/ViewportContainer/SubViewport"]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
+shadow_enabled = true
+
+[node name="orbCam" parent="VBoxContainer2/HSplitContainer/ViewportContainer/SubViewport" instance=ExtResource("1_vfvc6")]
+unique_name_in_owner = true
+clickOnly = true
+current = true
+freeView = true
+
+[node name="RayCast3D" type="RayCast3D" parent="VBoxContainer2/HSplitContainer/ViewportContainer/SubViewport"]
+unique_name_in_owner = true
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer2/HSplitContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 10
+
+[node name="Panel" type="Panel" parent="VBoxContainer2/HSplitContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="Inspector" type="VBoxContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="blockIdx" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="FoldableContainer" type="FoldableContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector"]
+layout_mode = 2
+title = "Quad Flags"
+
+[node name="GridContainer" type="GridContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer"]
+layout_mode = 2
+columns = 4
+
+[node name="Label" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+layout_mode = 2
+text = "Invisible"
+
+[node name="Invisible" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+layout_mode = 2
+text = "Trigger Script"
+
+[node name="TriggerScript" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+layout_mode = 2
+text = "Moon Gravity"
+
+[node name="MoonGravity" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label4" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+layout_mode = 2
+text = "Reflection"
+
+[node name="Reflection" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label5" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+layout_mode = 2
+text = "Reverb"
+
+[node name="Reverb" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label6" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+layout_mode = 2
+text = "Wall                 "
+
+[node name="Wall" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label7" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+layout_mode = 2
+text = "Fall Boost"
+
+[node name="FallBoost" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label8" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+layout_mode = 2
+text = "Out of Bounds"
+
+[node name="OutOfBounds" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label9" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+layout_mode = 2
+text = "?"
+
+[node name="unk1" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label10" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+layout_mode = 2
+text = "?"
+
+[node name="unk2" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label11" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+layout_mode = 2
+text = "Mask Grab"
+
+[node name="MaskGrab" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label12" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+layout_mode = 2
+text = "Temple Door Open"
+
+[node name="TempleDoorOpen" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label13" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+layout_mode = 2
+text = "Colission Trigger"
+
+[node name="CollisionEditor" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label14" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+layout_mode = 2
+text = "Is Ground"
+
+[node name="IsGround" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label15" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+layout_mode = 2
+text = "No Collision"
+
+[node name="NoCollision" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label16" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+layout_mode = 2
+text = "Invisible Trigger"
+
+[node name="InvisibleTrigger" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/Inspector/FoldableContainer/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="FileDialog" type="FileDialog" parent="."]
+title = "Open a File"
+auto_translate = false
+file_mode = 0
+filters = PackedStringArray("*.iso")
+use_native_dialog = true
+
+[node name="ctrLoader" parent="." instance=ExtResource("3_sth5e")]
+
+[node name="VBoxContainer" type="Control" parent="."]
+visible = false
+custom_minimum_size = Vector2(490.005, 0)
+layout_mode = 1
+anchors_preset = 13
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -185.0
+offset_top = -1.0
+offset_right = 184.29504
+offset_bottom = -1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel2" type="Panel" parent="VBoxContainer/ScrollContainer"]
+modulate = Color(0, 0, 0, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Panel" type="Panel" parent="VBoxContainer/ScrollContainer"]
+modulate = Color(0, 0, 0, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 8
+
+[node name="MapList" type="VBoxContainer" parent="VBoxContainer/ScrollContainer/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 11
+
+[node name="Button" type="Button" parent="VBoxContainer/ScrollContainer/MarginContainer/MapList"]
+layout_mode = 2
+
+[node name="SaveLevDialog" type="FileDialog" parent="."]
+auto_translate = false
+filters = PackedStringArray("*.lev")
+use_native_dialog = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="SaveLevDialog"]
+
+[node name="Label" type="Label" parent="SaveLevDialog/HBoxContainer"]
+layout_mode = 2
+text = "Invisible"
+
+[node name="CheckBox" type="CheckBox" parent="SaveLevDialog/HBoxContainer"]
+layout_mode = 2
+
+[connection signal="gui_input" from="VBoxContainer2/HSplitContainer/ViewportContainer" to="." method="_on_viewport_container_gui_input"]
+[connection signal="file_selected" from="FileDialog" to="." method="_on_file_dialog_file_selected"]
+[connection signal="file_selected" from="SaveLevDialog" to="." method="_on_save_lev_dialog_file_selected"]

@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://o83ibimbxwg0"]
+
+[ext_resource type="Script" uid="uid://b0v2qmqe5my4i" path="res://addons/ctr/src/ISOreader/isoReader.gd" id="1_7nkjr"]
+[ext_resource type="Script" uid="uid://c7nri782jnmvc" path="res://addons/ctr/src/BINreader/BINreader.gd" id="2_5qhfn"]
+
+[node name="IsoReader" type="Node2D"]
+script = ExtResource("1_7nkjr")
+
+[node name="BinReader" type="Node" parent="."]
+script = ExtResource("2_5qhfn")

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://x65kymsmvgwd"]
+
+[ext_resource type="Script" uid="uid://c7nri782jnmvc" path="res://addons/ctr/src/BINreader/BINreader.gd" id="1_wtcfe"]
+
+[node name="Node2D" type="Node2D"]
+script = ExtResource("1_wtcfe")

@@ -1,0 +1,29 @@
+[gd_scene load_steps=8 format=3 uid="uid://db2gn5nk6t2yr"]
+
+[ext_resource type="Script" uid="uid://cku7p1ds727r3" path="res://addons/ctr/ctrLoader.gd" id="1_iwpey"]
+[ext_resource type="Script" uid="uid://dfotlel25qklq" path="res://addons/ctr/src/imageLoader.gd" id="2_1bqu3"]
+[ext_resource type="Script" uid="uid://b18t7alkx6unt" path="res://addons/ctr/modelLoader.gd" id="3_bkksd"]
+[ext_resource type="Script" uid="uid://5fftv0gbfixf" path="res://addons/ctr/src/mapLoader.gd" id="4_78d3n"]
+[ext_resource type="Script" uid="uid://dagfr4cjep6bp" path="res://addons/ctr/src/entityLoader.gd" id="5_d6etg"]
+[ext_resource type="Script" uid="uid://n44va2feetrv" path="res://addons/ctr/resource_manager.gd" id="6_bpcg0"]
+[ext_resource type="PackedScene" uid="uid://o83ibimbxwg0" path="res://addons/ctr/src/ISOreader/isoReader.tscn" id="7_clrp5"]
+
+[node name="ctrLoader" type="Node"]
+script = ExtResource("1_iwpey")
+
+[node name="imageLoader" type="Node" parent="."]
+script = ExtResource("2_1bqu3")
+
+[node name="modelLoader" type="Node" parent="."]
+script = ExtResource("3_bkksd")
+
+[node name="mapLoader" type="Node" parent="."]
+script = ExtResource("4_78d3n")
+
+[node name="entityLoader" type="Node" parent="."]
+script = ExtResource("5_d6etg")
+
+[node name="resourceManager" type="Node" parent="."]
+script = ExtResource("6_bpcg0")
+
+[node name="IsoReader" parent="." instance=ExtResource("7_clrp5")]

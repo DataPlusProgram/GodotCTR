@@ -1,0 +1,9 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://d001vekkojpf6"]
+
+[ext_resource type="Shader" uid="uid://cqkb35jb28msg" path="res://addons/ctr/shaders/8wayBillboard.gdshader" id="1_liesg"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_liesg")
+shader_parameter/pixelSize = Vector2(1, 1)
+shader_parameter/modulate = Color(1, 1, 1, 1)

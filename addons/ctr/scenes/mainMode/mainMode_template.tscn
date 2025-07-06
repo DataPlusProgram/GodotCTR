@@ -1,0 +1,60 @@
+[gd_scene load_steps=8 format=3 uid="uid://mmwrolg4s8gu"]
+
+[ext_resource type="Script" uid="uid://cpeiq3e445kh0" path="res://addons/ctr/scenes/mainMode/main_mode_template.gd" id="1_m4cwe"]
+[ext_resource type="Script" uid="uid://d3orinws661ab" path="res://addons/ctr/scenes/mainMode/ctrMainModeGenerator.gd" id="2_1yhpi"]
+[ext_resource type="Shader" uid="uid://d1jkymbqk4thn" path="res://addons/ctr/scenes/mainMode/mainMode_template.gdshader" id="3_nb37u"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tk48s"]
+shader = ExtResource("3_nb37u")
+shader_parameter/BLACK = Vector3(0.5, 0.5, 0.5)
+shader_parameter/aspect_ratio = 1.3333
+shader_parameter/squares = 1.8000000000029104
+shader_parameter/skew_x = 0.2
+shader_parameter/skew_y = 0.0
+
+[sub_resource type="Animation" id="Animation_tk48s"]
+length = 0.001
+
+[sub_resource type="Animation" id="Animation_nb37u"]
+resource_name = "flagMoveLeft"
+step = 0.0333333
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_qf4ul"]
+_data = {
+&"RESET": SubResource("Animation_tk48s"),
+&"flagMoveLeft": SubResource("Animation_nb37u")
+}
+
+[node name="MainMode" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 6
+size_flags_vertical = 3
+script = ExtResource("1_m4cwe")
+
+[node name="Generator" type="Node" parent="."]
+script = ExtResource("2_1yhpi")
+dependantChildren = Array[String](["res://addons/ctr/scenes/ui/characterSelect/characterSelect_template.tscn", "res://addons/ctr/scenes/ui/levelSelect/levelSelect.tscn"])
+
+[node name="Flag" type="ColorRect" parent="."]
+z_index = -6
+material = SubResource("ShaderMaterial_tk48s")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -14.0
+offset_top = -46.0
+offset_right = 28.0
+offset_bottom = 51.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_qf4ul")
+}

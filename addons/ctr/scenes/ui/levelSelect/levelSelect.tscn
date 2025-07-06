@@ -1,0 +1,68 @@
+[gd_scene load_steps=2 format=3 uid="uid://3eaxjmgcr4nr"]
+
+[ext_resource type="Script" uid="uid://dvtbe66wnq6ma" path="res://addons/ctr/scenes/ui/levelSelect/levelSelect.gd" id="1_mjimu"]
+
+[node name="LevelSelect" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_mjimu")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="ScrollContainer"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="ColorRect" type="ColorRect" parent="ScrollContainer/MarginContainer"]
+layout_mode = 2
+color = Color(0.44291076, 0.44291076, 0.44291073, 0.85490197)
+
+[node name="mapList" type="VBoxContainer" parent="ScrollContainer/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 3
+
+[node name="Control" type="Control" parent="."]
+anchors_preset = 0
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = 581.0
+offset_top = 44.0
+offset_right = 1091.0
+offset_bottom = 260.0
+
+[node name="MarginContainer" type="MarginContainer" parent="ColorRect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 99
+
+[node name="previewImage" type="TextureRect" parent="ColorRect/MarginContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(510, 216)
+layout_mode = 2
+
+[connection signal="visibility_changed" from="." to="." method="_on_visibility_changed"]

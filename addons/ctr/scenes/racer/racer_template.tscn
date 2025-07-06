@@ -1,0 +1,41 @@
+[gd_scene load_steps=5 format=3 uid="uid://c6rl8rt2mfd5j"]
+
+[ext_resource type="Script" uid="uid://db03xb0srxcrc" path="res://addons/ctr/scenes/racer/racer_template.gd" id="1_fi4ug"]
+[ext_resource type="PackedScene" uid="uid://c86ca8w5tvtxl" path="res://addons/gameAssetImporter/scenes/orbCam/orbCam.tscn" id="2_ga3s6"]
+[ext_resource type="PackedScene" uid="uid://gbl2xgx80gwl" path="res://addons/gameAssetImporter/scenes/movement/movement.tscn" id="4_ga3s6"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_fi4ug"]
+size = Vector3(1.69189, 1, 1.79688)
+
+[node name="RacerTemplate" type="CharacterBody3D"]
+script = ExtResource("1_fi4ug")
+turn_speed = 1.0
+
+[node name="visual" type="Node3D" parent="."]
+
+[node name="orbCam" parent="visual" instance=ExtResource("2_ga3s6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.162994)
+current = true
+initialRot = Vector2(0, -20.87)
+dist = 5
+lock = true
+
+[node name="v" parent="visual/orbCam/h" index="0"]
+transform = Transform3D(1, 0, 0, 0, 0.9343911, 0.35624877, 0, -0.35624877, 0.9343911, 0, 0, 0)
+
+[node name="Camera3D" parent="visual/orbCam/h/v" index="0"]
+transform = Transform3D(1, 0, -1.19209e-07, 0, 1, 0, -8.9407e-08, 0, 1, 0, 0, 5)
+current = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.57024, 0)
+shape = SubResource("BoxShape3D_fi4ug")
+
+[node name="movement" parent="." instance=ExtResource("4_ga3s6")]
+stepAmt = 0.8
+forwardSpeed = 1.2
+groundEmergeFix = true
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+
+[editable path="visual/orbCam"]

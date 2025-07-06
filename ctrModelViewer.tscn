@@ -1,0 +1,243 @@
+[gd_scene load_steps=11 format=3 uid="uid://cuuc758f0pgaa"]
+
+[ext_resource type="Script" uid="uid://bavku7isiphj0" path="res://addons/gameAssetImporter/scenes/makeUI/preview.gd" id="1_en34p"]
+[ext_resource type="Environment" uid="uid://cd5ps65wxndw1" path="res://addons/gameAssetImporter/scenes/makeUI/previewEnvironment.tres" id="2_ilyfh"]
+[ext_resource type="PackedScene" uid="uid://c86ca8w5tvtxl" path="res://addons/gameAssetImporter/scenes/orbCam/orbCam.tscn" id="3_havml"]
+[ext_resource type="Texture2D" uid="uid://b6veuofc115wo" path="res://addons/gameAssetImporter/scenes/makeUI/texture_07.png" id="4_kxg2m"]
+[ext_resource type="Script" uid="uid://cqt457w5t5bsx" path="res://modelViewr.gd" id="5_ilyfh"]
+
+[sub_resource type="World3D" id="World3D_kovxe"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p6ptb"]
+albedo_texture = ExtResource("4_kxg2m")
+uv1_triplanar = true
+
+[sub_resource type="QuadMesh" id="QuadMesh_j48ch"]
+lightmap_size_hint = Vector2i(502, 502)
+material = SubResource("StandardMaterial3D_p6ptb")
+add_uv2 = true
+size = Vector2(100, 100)
+
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_2h1as"]
+data = PackedVector3Array(-5, -5, 0, -5, 5, 0, 5, 5, 0, -5, -5, 0, 5, 5, 0, 5, -5, 0)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_s34jw"]
+transparency = 1
+albedo_color = Color(1, 0, 0, 0.364706)
+
+[node name="ModelViewer" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_en34p")
+
+[node name="MenuBar" type="MenuBar" parent="."]
+custom_minimum_size = Vector2(0, 30.025)
+layout_mode = 2
+
+[node name="menuButtonOpen" type="MenuButton" parent="MenuBar"]
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+text = "File"
+item_count = 3
+popup/item_0/text = "CTR"
+popup/item_0/id = 0
+popup/item_1/text = "Bigfile"
+popup/item_1/id = 2
+popup/item_2/text = "ISO"
+popup/item_2/id = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ListPanel" type="Panel" parent="HBoxContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.27
+
+[node name="ItemList" type="ItemList" parent="HBoxContainer/ListPanel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VSplitContainer" type="VSplitContainer" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+split_offset = 87
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="HBoxContainer/VSplitContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="HBoxContainer/VSplitContainer/SubViewportContainer"]
+unique_name_in_owner = true
+world_3d = SubResource("World3D_kovxe")
+handle_input_locally = false
+size = Vector2i(1152, 388)
+render_target_update_mode = 4
+
+[node name="CameraTopDown" parent="HBoxContainer/VSplitContainer/SubViewportContainer/SubViewport" instance=ExtResource("3_havml")]
+visible = false
+clickOnly = true
+allowPan = true
+yawRange = Vector2(-90, 90)
+initialRot = Vector2(0, -90)
+dist = 42
+
+[node name="Camera3D" parent="HBoxContainer/VSplitContainer/SubViewportContainer/SubViewport" instance=ExtResource("3_havml")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
+clickOnly = true
+allowPan = true
+current = true
+yawRange = Vector2(-90, 90)
+initialRot = Vector2(-40, -22)
+dist = 7
+freeView = true
+
+[node name="StaticBody3D" type="StaticBody3D" parent="HBoxContainer/VSplitContainer/SubViewportContainer/SubViewport"]
+collision_layer = 3
+collision_mask = 3
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="HBoxContainer/VSplitContainer/SubViewportContainer/SubViewport/StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
+mesh = SubResource("QuadMesh_j48ch")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="HBoxContainer/VSplitContainer/SubViewportContainer/SubViewport/StaticBody3D/MeshInstance3D"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="HBoxContainer/VSplitContainer/SubViewportContainer/SubViewport/StaticBody3D/MeshInstance3D/StaticBody3D"]
+shape = SubResource("ConcavePolygonShape3D_2h1as")
+
+[node name="CSGSphere3D" type="CSGSphere3D" parent="HBoxContainer/VSplitContainer/SubViewportContainer/SubViewport"]
+radius = 0.05
+radial_segments = 24
+rings = 12
+material = SubResource("StandardMaterial3D_s34jw")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="HBoxContainer/VSplitContainer/SubViewportContainer/SubViewport"]
+environment = ExtResource("2_ilyfh")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="HBoxContainer/VSplitContainer/SubViewportContainer/SubViewport"]
+transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 33.0049, 0)
+light_color = Color(0.95963, 0.950206, 0.889758, 1)
+light_energy = 1.103
+shadow_enabled = true
+shadow_blur = 1.826
+
+[node name="Panel" type="Panel" parent="HBoxContainer/VSplitContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/VSplitContainer/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer"]
+layout_mode = 2
+
+[node name="noAnimLabel" type="RichTextLabel" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+text = "[color=#5C5959]Model has no animation data[/color]"
+horizontal_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer"]
+visible = false
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="AnimsList" type="OptionButton" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Loop"
+
+[node name="isLoop" type="CheckBox" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="PlayButton" type="Button" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Play"
+
+[node name="HSeparator" type="HSeparator" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="showWheels" type="HBoxContainer" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/showWheels"]
+layout_mode = 2
+text = "Show Wheels"
+
+[node name="ShowWheelsCheckbox" type="CheckBox" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/showWheels"]
+unique_name_in_owner = true
+layout_mode = 2
+button_pressed = true
+
+[node name="FileDialog" type="FileDialog" parent="."]
+auto_translate_mode = 2
+title = "Open a File"
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.ctr")
+use_native_dialog = true
+
+[node name="FileDialogISO" type="FileDialog" parent="."]
+auto_translate_mode = 2
+title = "Open a File"
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.iso")
+use_native_dialog = true
+
+[node name="FileDialogBIG" type="FileDialog" parent="."]
+auto_translate_mode = 2
+title = "Open a File"
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.big")
+use_native_dialog = true
+
+[node name="Node" type="Node" parent="."]
+script = ExtResource("5_ilyfh")
+
+[connection signal="item_selected" from="HBoxContainer/ListPanel/ItemList" to="Node" method="_on_item_list_item_selected"]
+[connection signal="mouse_entered" from="HBoxContainer/VSplitContainer/SubViewportContainer" to="." method="_on_sub_viewport_container_mouse_entered"]
+[connection signal="mouse_exited" from="HBoxContainer/VSplitContainer/SubViewportContainer" to="." method="_on_sub_viewport_container_mouse_exited"]
+[connection signal="toggled" from="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/isLoop" to="Node" method="_on_is_loop_toggled"]
+[connection signal="pressed" from="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/PlayButton" to="Node" method="_on_play_button_pressed"]
+[connection signal="toggled" from="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/showWheels/ShowWheelsCheckbox" to="Node" method="_on_show_wheels_checkbox_toggled"]
+[connection signal="file_selected" from="FileDialog" to="Node" method="_on_file_dialog_file_selected"]
+[connection signal="file_selected" from="FileDialogISO" to="Node" method="_on_file_dialog_iso_file_selected"]
+[connection signal="file_selected" from="FileDialogBIG" to="Node" method="_on_file_dialog_big_file_selected"]
