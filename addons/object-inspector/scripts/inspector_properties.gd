@@ -1,6 +1,6 @@
 # Copyright (c) 2022-2025 Mansur Isaev and contributors - MIT License
 # See `LICENSE.md` included in the source distribution for details.
-
+@tool
 # Magic numbers, but otherwise the SpinBox does not work correctly.
 const INT32_MIN: int = -2147483648
 const INT32_MAX: int =  2147483647

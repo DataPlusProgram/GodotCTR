@@ -1,0 +1,97 @@
+[gd_scene load_steps=3 format=3 uid="uid://5eufq6fvpb8n"]
+
+[ext_resource type="Script" uid="uid://bb2tpswho1qyj" path="res://addons/gameAssetImporter/scenes/copyTool/projectCopy.gd" id="1_57wl4"]
+[ext_resource type="PackedScene" uid="uid://dylxxssl5t4na" path="res://addons/gameAssetImporter/scenes/makeUI/path.tscn" id="2_1i4eg"]
+
+[node name="Copy Project" type="MarginContainer"]
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.997
+offset_right = 2.0
+offset_bottom = -0.0560303
+size_flags_horizontal = 6
+size_flags_vertical = 6
+metadata/_tab_index = 1
+
+[node name="VBoxContainer3" type="VBoxContainer" parent="."]
+layout_mode = 2
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer3"]
+layout_mode = 2
+theme_override_constants/separation = 28
+alignment = 1
+script = ExtResource("1_57wl4")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer3/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="path" parent="VBoxContainer3/VBoxContainer/HBoxContainer" instance=ExtResource("2_1i4eg")]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 1
+many = false
+
+[node name="Label" parent="VBoxContainer3/VBoxContainer/HBoxContainer/path/h" index="0"]
+text = "Source"
+
+[node name="pathTxt" parent="VBoxContainer3/VBoxContainer/HBoxContainer/path/h" index="1"]
+custom_minimum_size = Vector2(250, 0)
+size_flags_vertical = 4
+text = "res://addons"
+
+[node name="FileDialog" parent="VBoxContainer3/VBoxContainer/HBoxContainer/path" index="2"]
+title = "Open a Directory"
+file_mode = 2
+
+[node name="VSeparator" type="VSeparator" parent="VBoxContainer3/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="path2" parent="VBoxContainer3/VBoxContainer/HBoxContainer" instance=ExtResource("2_1i4eg")]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 1
+many = false
+
+[node name="pathTxt" parent="VBoxContainer3/VBoxContainer/HBoxContainer/path2/h" index="1"]
+custom_minimum_size = Vector2(250, 0)
+text = "desktop"
+
+[node name="FileDialog" parent="VBoxContainer3/VBoxContainer/HBoxContainer/path2" index="2"]
+title = "Open a Directory"
+file_mode = 2
+
+[node name="CopyButton" type="Button" parent="VBoxContainer3/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Copy"
+
+[node name="HSeparator" type="HSeparator" parent="VBoxContainer3/VBoxContainer"]
+self_modulate = Color(1, 1, 1, 0.211765)
+layout_mode = 2
+
+[node name="GridContainer" type="GridContainer" parent="VBoxContainer3/VBoxContainer"]
+layout_mode = 2
+columns = 4
+
+[node name="Label" type="Label" parent="VBoxContainer3/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "Force inclusion of project.godot"
+
+[node name="forceProject" type="CheckBox" parent="VBoxContainer3/VBoxContainer/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+button_pressed = true
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer3"]
+custom_minimum_size = Vector2(0, 43.33)
+layout_mode = 2
+
+[connection signal="pressed" from="VBoxContainer3/VBoxContainer/CopyButton" to="VBoxContainer3/VBoxContainer" method="_on_copy_button_pressed"]
+
+[editable path="VBoxContainer3/VBoxContainer/HBoxContainer/path"]
+[editable path="VBoxContainer3/VBoxContainer/HBoxContainer/path2"]

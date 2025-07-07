@@ -1,0 +1,24 @@
+[gd_scene load_steps=2 format=3 uid="uid://gbl2xgx80gwl"]
+
+[ext_resource type="Script" uid="uid://3md525ovgw6k" path="res://addons/gameAssetImporter/scenes/movement/movement.gd" id="1_iftyj"]
+
+[node name="movement" type="Node3D"]
+script = ExtResource("1_iftyj")
+sideSpeed = 1.25
+gravity = 28.571
+
+[node name="footCast" type="ShapeCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+enabled = false
+max_results = 5
+debug_shape_custom_color = Color(1, 1, 1, 1)
+
+[node name="ShapeCastH" type="ShapeCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.3, 0)
+enabled = false
+max_results = 5
+debug_shape_custom_color = Color(0, 0.0627451, 1, 1)
+
+[node name="footRay" type="RayCast3D" parent="."]
+top_level = true
+target_position = Vector3(0, -0.005, 0)

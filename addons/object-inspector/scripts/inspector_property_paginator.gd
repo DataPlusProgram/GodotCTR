@@ -1,6 +1,6 @@
 # Copyright (c) 2022-2025 Mansur Isaev and contributors - MIT License
 # See `LICENSE.md` included in the source distribution for details.
-
+@tool
 extends VBoxContainer
 
 

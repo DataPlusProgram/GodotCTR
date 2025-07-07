@@ -1,0 +1,38 @@
+[gd_scene load_steps=4 format=3 uid="uid://5gt3hxkno7uv"]
+
+[ext_resource type="PackedScene" uid="uid://bqll4b6vyuo4s" path="res://addons/gameAssetImporter/scenes/copyTool/scenes/symLink.tscn" id="1_w41mp"]
+[ext_resource type="PackedScene" uid="uid://5eufq6fvpb8n" path="res://addons/gameAssetImporter/scenes/copyTool/scenes/copyProject.tscn" id="2_cos8g"]
+[ext_resource type="PackedScene" uid="uid://ccgaybbckew53" path="res://addons/gameAssetImporter/scenes/copyTool/scenes/githubProjects.tscn" id="3_cos8g"]
+
+[node name="ProjectCopy" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 185.0
+offset_right = -165.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TabContainer" type="TabContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -0.233
+anchor_right = 1.207
+anchor_bottom = 1.0
+offset_left = -0.133987
+offset_right = -0.0140381
+grow_horizontal = 2
+grow_vertical = 2
+current_tab = 2
+
+[node name="sym link" parent="TabContainer" instance=ExtResource("1_w41mp")]
+visible = false
+layout_mode = 2
+
+[node name="Copy Project" parent="TabContainer" instance=ExtResource("2_cos8g")]
+visible = false
+layout_mode = 2
+
+[node name="Github Projects" parent="TabContainer" instance=ExtResource("3_cos8g")]
+layout_mode = 2
