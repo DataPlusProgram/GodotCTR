@@ -1,0 +1,27 @@
+[gd_scene load_steps=3 format=3 uid="uid://bbbgj6xynhxxw"]
+
+[ext_resource type="Script" uid="uid://ba7ke4ltmb3e7" path="res://addons/gameAssetImporter/scenes/autocomplete/autocomplete.gd" id="1_chp8w"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_f6e04"]
+bg_color = Color(0.1632, 0.165693, 0.17, 1)
+
+[node name="Autocomplete" type="LineEdit"]
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.066358
+offset_left = -1.0
+offset_top = 250.0
+offset_right = -1.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_chp8w")
+metadata/_edit_use_anchors_ = true
+
+[node name="ItemList" type="ItemList" parent="."]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 96.0
+offset_bottom = 96.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_f6e04")

@@ -1,0 +1,22 @@
+[gd_scene load_steps=2 format=3 uid="uid://xkijn5f84k7n"]
+
+[ext_resource type="Script" uid="uid://jwxq3e3yyijp" path="res://addons/gameAssetImporter/scenes/timingsDebug/timings_debug.gd" id="1_gg3sw"]
+
+[node name="timingsDebug" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_gg3sw")
+
+[node name="timingsTree" type="Tree" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/draw_relationship_lines = 1
+theme_override_constants/v_separation = 2
+columns = 6
+hide_root = true
+
+[connection signal="tree_exiting" from="." to="." method="_on_tree_exiting"]
+[connection signal="visibility_changed" from="." to="." method="_on_visibility_changed"]

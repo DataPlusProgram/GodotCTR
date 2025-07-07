@@ -804,10 +804,16 @@ func createFrameMesh(drawList,frameVerts,frameVertOffsets,scale,colors,textureLa
 		arrays[Mesh.ARRAY_VERTEX].append(triVerts[v][1])
 		arrays[Mesh.ARRAY_VERTEX].append(triVerts[v][0])
 		
-		arrays[Mesh.ARRAY_COLOR].append(vertColors[v][2])
-		arrays[Mesh.ARRAY_COLOR].append(vertColors[v][1])
-		arrays[Mesh.ARRAY_COLOR].append(vertColors[v][0])
 		
+		#if currentTexture == null:
+		arrays[Mesh.ARRAY_COLOR].append(vertColors[v][0]-Color.WHITE*0.5)
+		arrays[Mesh.ARRAY_COLOR].append(vertColors[v][1]-Color.WHITE*0.5)
+		arrays[Mesh.ARRAY_COLOR].append(vertColors[v][2]-Color.WHITE*0.5)
+		#else:
+		#	arrays[Mesh.ARRAY_COLOR].append(vertColors[v][2])
+		#	arrays[Mesh.ARRAY_COLOR].append(vertColors[v][1])
+		#	arrays[Mesh.ARRAY_COLOR].append(vertColors[v][0])
+		#
 		arrays[Mesh.ARRAY_TEX_UV].append(triUVs[v][2])
 		arrays[Mesh.ARRAY_TEX_UV].append(triUVs[v][1])
 		arrays[Mesh.ARRAY_TEX_UV].append(triUVs[v][0])
@@ -857,9 +863,10 @@ func createMesh(triVerts,vertColors,triUVs,triTextures):
 		arrays[Mesh.ARRAY_VERTEX].append(triVerts[v][1])
 		arrays[Mesh.ARRAY_VERTEX].append(triVerts[v][2])
 		
-		arrays[Mesh.ARRAY_COLOR].append(vertColors[v][0])
-		arrays[Mesh.ARRAY_COLOR].append(vertColors[v][1])
-		arrays[Mesh.ARRAY_COLOR].append(vertColors[v][2])
+		
+		arrays[Mesh.ARRAY_COLOR].append(vertColors[v][0]+Color(0.5,0.5,0.5))
+		arrays[Mesh.ARRAY_COLOR].append(vertColors[v][1]+Color(0.5,0.5,0.5))
+		arrays[Mesh.ARRAY_COLOR].append(vertColors[v][2]+Color(0.5,0.5,0.5))
 		
 		arrays[Mesh.ARRAY_TEX_UV].append(triUVs[v][0])
 		arrays[Mesh.ARRAY_TEX_UV].append(triUVs[v][1])

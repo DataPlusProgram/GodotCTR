@@ -1,0 +1,137 @@
+[gd_scene load_steps=3 format=3 uid="uid://neqwv3hnff7o"]
+
+[ext_resource type="Script" uid="uid://bh1db4c30gbvo" path="res://addons/gameAssetImporter/network/scenes/simpleUI/simple_ui.gd" id="1_53tq8"]
+[ext_resource type="PackedScene" uid="uid://bk0n3rsc0qs6t" path="res://addons/gameAssetImporter/network/scenes/serverManager/serverManager.tscn" id="2_06jed"]
+
+[node name="SimpleUi" type="Control"]
+layout_mode = 3
+anchor_left = 0.368
+anchor_top = 0.39
+anchor_right = 0.569
+anchor_bottom = 0.61
+offset_left = 0.0639648
+offset_top = 0.279984
+offset_right = 0.512085
+offset_bottom = -0.279877
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+script = ExtResource("1_53tq8")
+metadata/_edit_use_anchors_ = true
+
+[node name="NetworkManager" parent="." instance=ExtResource("2_06jed")]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.203
+anchor_bottom = 0.221
+offset_right = 0.143982
+offset_bottom = -0.208008
+
+[node name="Control" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.02586
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="MarginContainer" type="MarginContainer" parent="Control"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -71.5
+offset_top = -60.5
+offset_right = 71.5
+offset_bottom = 60.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/MarginContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="GridContainer" parent="Control/MarginContainer/VBoxContainer"]
+layout_mode = 2
+columns = 2
+
+[node name="Label" type="Label" parent="Control/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Host:"
+
+[node name="ipText" type="LineEdit" parent="Control/MarginContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "127.0.0.1"
+expand_to_text_length = true
+
+[node name="HBoxContainer3" type="GridContainer" parent="Control/MarginContainer/VBoxContainer"]
+layout_mode = 2
+columns = 2
+
+[node name="Label" type="Label" parent="Control/MarginContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+text = "Port:"
+
+[node name="portText" type="LineEdit" parent="Control/MarginContainer/VBoxContainer/HBoxContainer3"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "7777"
+expand_to_text_length = true
+
+[node name="GridContainer" type="GridContainer" parent="Control/MarginContainer/VBoxContainer"]
+layout_mode = 2
+columns = 2
+
+[node name="ServerButton" type="Button" parent="Control/MarginContainer/VBoxContainer/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Server"
+
+[node name="ClientButton" type="Button" parent="Control/MarginContainer/VBoxContainer/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Client"
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="syncLost" type="Panel" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -1.82759
+anchor_top = 0.105155
+anchor_right = 3.12931
+anchor_bottom = 0.577465
+offset_top = 0.0679703
+offset_right = -0.00012207
+offset_bottom = -6.10352e-05
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="Label" type="Label" parent="syncLost"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -11.5
+offset_right = 20.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Sync Lost"
+
+[connection signal="pressed" from="Control/MarginContainer/VBoxContainer/GridContainer/ServerButton" to="." method="_on_server_button_pressed"]
+[connection signal="pressed" from="Control/MarginContainer/VBoxContainer/GridContainer/ClientButton" to="." method="_on_client_button_pressed"]

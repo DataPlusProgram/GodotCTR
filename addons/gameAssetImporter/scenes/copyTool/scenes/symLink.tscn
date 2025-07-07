@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3 uid="uid://bqll4b6vyuo4s"]
+
+[ext_resource type="PackedScene" uid="uid://dylxxssl5t4na" path="res://addons/gameAssetImporter/scenes/makeUI/path.tscn" id="1_gls51"]
+[ext_resource type="Script" uid="uid://tlgkais6b38t" path="res://addons/gameAssetImporter/scenes/copyTool/scenes/symLink.gd" id="1_stl40"]
+
+[node name="sym link" type="VBoxContainer"]
+alignment = 1
+script = ExtResource("1_stl40")
+metadata/_edit_use_anchors_ = true
+metadata/_tab_index = 0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+alignment = 1
+
+[node name="addonsPath" parent="HBoxContainer" instance=ExtResource("1_gls51")]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 1
+many = false
+
+[node name="pathTxt" parent="HBoxContainer/addonsPath/h" index="1"]
+custom_minimum_size = Vector2(300, 0)
+text = "res://addons"
+
+[node name="addonDirButton" type="Button" parent="HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Open"
+
+[node name="SymText" type="Button" parent="HBoxContainer"]
+layout_mode = 2
+text = "Sym"
+
+[connection signal="pressed" from="HBoxContainer/addonDirButton" to="." method="_on_addon_dir_button_pressed"]
+[connection signal="pressed" from="HBoxContainer/SymText" to="." method="_on_sym_text_pressed"]
+
+[editable path="HBoxContainer/addonsPath"]

@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://byqmyljpol1bv"]
+
+[ext_resource type="PackedScene" uid="uid://xkijn5f84k7n" path="res://addons/gameAssetImporter/scenes/timingsDebug/timingsDebug.tscn" id="1_cbtbk"]
+
+[node name="TimingsDebugWindow" type="Window"]
+position = Vector2i(195, 60)
+size = Vector2i(820, 530)
+
+[node name="timingsDebug" parent="." instance=ExtResource("1_cbtbk")]
+
+[connection signal="close_requested" from="." to="timingsDebug" method="_on_timings_debug_window_close_requested"]
