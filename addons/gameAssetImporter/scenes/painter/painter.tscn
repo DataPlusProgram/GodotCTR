@@ -1,0 +1,299 @@
+[gd_scene load_steps=11 format=3 uid="uid://b655qderm0gs0"]
+
+[ext_resource type="Script" uid="uid://cq5oexn4p5q1e" path="res://addons/gameAssetImporter/scenes/painter/painter.gd" id="1_81c65"]
+[ext_resource type="Script" uid="uid://b7ow1vteiqflb" path="res://addons/gameAssetImporter/scenes/painter/camera_2d.gd" id="1_ndtd6"]
+[ext_resource type="Script" uid="uid://cfoxu5skq4d01" path="res://addons/gameAssetImporter/scenes/painter/painterAll.gd" id="1_xi82u"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ndtd6"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.26028818, 0.26028818, 0.26028818, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_81c65"]
+content_margin_left = 4.0
+content_margin_top = 0.0
+content_margin_right = 4.0
+content_margin_bottom = 0.0
+color = Color(0.5, 0.5, 0.5, 0.15294118)
+thickness = 2
+
+[sub_resource type="InputEventKey" id="InputEventKey_ndtd6"]
+device = -1
+keycode = 80
+unicode = 112
+
+[sub_resource type="Shortcut" id="Shortcut_81c65"]
+events = [SubResource("InputEventKey_ndtd6")]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xi82u"]
+bg_color = Color(0, 0, 0, 1)
+
+[sub_resource type="Theme" id="Theme_81c65"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_81c65"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.1, 0.1, 0.1, 0.6)
+
+[node name="Painter" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_xi82u")
+paletteColors = PackedColorArray()
+bgColor = Color(0.26028818, 0.26028818, 0.26028818, 1)
+imageBgColor = Color(0.5649613, 0.56496173, 0.5649616, 1)
+viewportSideMargin = 5
+viewportVerticalMargin = 0
+
+[node name="bg" type="Panel" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ndtd6")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="bg"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="bg/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="MenuContainer" type="MarginContainer" parent="bg/VBoxContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/margin_left = 11
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 1
+theme_override_constants/margin_bottom = -2
+
+[node name="MenuBar" type="MenuBar" parent="bg/VBoxContainer/VBoxContainer/MenuContainer"]
+custom_minimum_size = Vector2(0, 31.03)
+layout_mode = 2
+
+[node name="MenuButtonFile" type="MenuButton" parent="bg/VBoxContainer/VBoxContainer/MenuContainer/MenuBar"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+text = "File"
+item_count = 3
+popup/item_0/text = "Open"
+popup/item_0/id = 0
+popup/item_1/id = 1
+popup/item_1/separator = true
+popup/item_2/text = "Save"
+popup/item_2/id = 2
+
+[node name="MarginContainer3" type="MarginContainer" parent="bg/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 7
+theme_override_constants/margin_right = 7
+
+[node name="HSeparator" type="HSeparator" parent="bg/VBoxContainer/VBoxContainer/MarginContainer3"]
+layout_mode = 2
+theme_override_constants/separation = 1
+theme_override_styles/separator = SubResource("StyleBoxLine_81c65")
+
+[node name="MarginContainer2" type="MarginContainer" parent="bg/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 5
+
+[node name="Tools" type="GridContainer" parent="bg/VBoxContainer/VBoxContainer/MarginContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+columns = 4
+
+[node name="PenButton" type="Button" parent="bg/VBoxContainer/VBoxContainer/MarginContainer2/Tools"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Pen"
+theme_type_variation = &"FlatButton"
+toggle_mode = true
+button_pressed = true
+shortcut = SubResource("Shortcut_81c65")
+text = "Pen"
+
+[node name="FillButton" type="Button" parent="bg/VBoxContainer/VBoxContainer/MarginContainer2/Tools"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Fill"
+theme_type_variation = &"FlatButton"
+toggle_mode = true
+text = "Fill"
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="bg/VBoxContainer/VBoxContainer/MarginContainer2/Tools"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "     "
+
+[node name="PaletteButtonContainer" type="MarginContainer" parent="bg/VBoxContainer/VBoxContainer/MarginContainer2/Tools"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(32, 0)
+layout_mode = 2
+theme_override_constants/margin_left = 1
+theme_override_constants/margin_top = 1
+theme_override_constants/margin_right = 1
+theme_override_constants/margin_bottom = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="bg/VBoxContainer/VBoxContainer/MarginContainer2/Tools/PaletteButtonContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = -2
+theme_override_constants/margin_top = -2
+theme_override_constants/margin_right = -2
+theme_override_constants/margin_bottom = -2
+
+[node name="Panel" type="Panel" parent="bg/VBoxContainer/VBoxContainer/MarginContainer2/Tools/PaletteButtonContainer/MarginContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_xi82u")
+
+[node name="PaletteButton" type="ColorRect" parent="bg/VBoxContainer/VBoxContainer/MarginContainer2/Tools/PaletteButtonContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32.02, 0)
+layout_mode = 2
+theme = SubResource("Theme_81c65")
+theme_type_variation = &"FlatButton"
+
+[node name="ViewportMargin" type="MarginContainer" parent="bg/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 10
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="bg/VBoxContainer/ViewportMargin"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+stretch = true
+script = ExtResource("1_81c65")
+
+[node name="SubViewport" type="SubViewport" parent="bg/VBoxContainer/ViewportMargin/SubViewportContainer"]
+unique_name_in_owner = true
+handle_input_locally = false
+size = Vector2i(1142, 542)
+size_2d_override_stretch = true
+render_target_update_mode = 4
+
+[node name="Camera2D" type="Camera2D" parent="bg/VBoxContainer/ViewportMargin/SubViewportContainer/SubViewport"]
+unique_name_in_owner = true
+script = ExtResource("1_ndtd6")
+
+[node name="TextureRect" type="TextureRect" parent="bg/VBoxContainer/ViewportMargin/SubViewportContainer/SubViewport"]
+unique_name_in_owner = true
+texture_filter = 1
+offset_right = 40.0
+offset_bottom = 40.0
+stretch_mode = 2
+
+[node name="BrushTexture" type="TextureRect" parent="bg/VBoxContainer/ViewportMargin/SubViewportContainer/SubViewport/TextureRect"]
+unique_name_in_owner = true
+texture_filter = 1
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+mouse_behavior_recursive = 1
+mouse_default_cursor_shape = 1
+stretch_mode = 2
+
+[node name="Control" type="HBoxContainer" parent="bg/VBoxContainer"]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="bg/VBoxContainer/Control"]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_constants/margin_right = 40
+
+[node name="ZoomLabel" type="Label" parent="bg/VBoxContainer/Control/MarginContainer"]
+unique_name_in_owner = true
+self_modulate = Color(1, 1, 1, 0.21568628)
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_font_sizes/font_size = 11
+text = "1.0%"
+horizontal_alignment = 2
+
+[node name="MarginContainer2" type="MarginContainer" parent="bg/VBoxContainer/Control"]
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_constants/margin_right = 8
+
+[node name="ImageDim" type="Label" parent="bg/VBoxContainer/Control/MarginContainer2"]
+unique_name_in_owner = true
+self_modulate = Color(1, 1, 1, 0.21568628)
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_font_sizes/font_size = 11
+text = "9X9"
+horizontal_alignment = 2
+
+[node name="FileDialogOpen" type="FileDialog" parent="."]
+unique_name_in_owner = true
+title = "Open a File"
+file_mode = 0
+filters = PackedStringArray("*.png", "*.svg")
+
+[node name="Window" type="Window" parent="."]
+oversampling_override = 1.0
+title = "Palette"
+position = Vector2i(100, 36)
+size = Vector2i(455, 100)
+visible = false
+
+[node name="Panel" type="Panel" parent="Window"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_81c65")
+
+[node name="PaletteColorContainer" type="HFlowContainer" parent="Window"]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 6
+size_flags_vertical = 6
+alignment = 1
+
+[connection signal="pressed" from="bg/VBoxContainer/VBoxContainer/MarginContainer2/Tools/PenButton" to="bg/VBoxContainer/ViewportMargin/SubViewportContainer" method="_on_pen_button_pressed"]
+[connection signal="toggled" from="bg/VBoxContainer/VBoxContainer/MarginContainer2/Tools/PenButton" to="bg/VBoxContainer/ViewportMargin/SubViewportContainer" method="_on_pen_button_toggled"]
+[connection signal="toggled" from="bg/VBoxContainer/VBoxContainer/MarginContainer2/Tools/FillButton" to="bg/VBoxContainer/ViewportMargin/SubViewportContainer" method="_on_fill_button_toggled"]
+[connection signal="color_changed" from="bg/VBoxContainer/VBoxContainer/MarginContainer2/Tools/ColorPickerButton" to="bg/VBoxContainer/ViewportMargin/SubViewportContainer" method="_on_color_picker_button_color_changed"]
+[connection signal="gui_input" from="bg/VBoxContainer/VBoxContainer/MarginContainer2/Tools/PaletteButtonContainer/PaletteButton" to="." method="_on_palette_button_gui_input"]
+[connection signal="gui_input" from="bg/VBoxContainer/ViewportMargin/SubViewportContainer/SubViewport/TextureRect" to="bg/VBoxContainer/ViewportMargin/SubViewportContainer" method="_on_texture_rect_gui_input"]
+[connection signal="gui_input" from="bg/VBoxContainer/ViewportMargin/SubViewportContainer/SubViewport/TextureRect/BrushTexture" to="bg/VBoxContainer/ViewportMargin/SubViewportContainer" method="_on_texture_rect_gui_input"]
+[connection signal="file_selected" from="FileDialogOpen" to="." method="_on_file_dialog_open_file_selected"]
+[connection signal="close_requested" from="Window" to="." method="_on_window_close_requested"]

@@ -216,7 +216,7 @@ func loadChar(charString):
 	textureData
 	loadingModels.append(entry)
 	
-	resourceManager.createModelThreaded(entry["modelPath"],["idle"],storage,textureData)
+	resourceManager.createModelThreaded(entry["modelPath"],{"specificAnims":["idle"]},storage,textureData)
 
 	
 	
@@ -254,6 +254,9 @@ func addIcon(icon):
 
 func iconHover(idx : int):
 	curSelectIdx = idx
+	var curIcon = grid.get_child(curSelectIdx)
+	
+	#EGLO.playGrowMaskAnimForNode(curIcon,Vector2.ONE*1.1,0.2)
 	
 
 func iconInput(ev : InputEvent,idx):

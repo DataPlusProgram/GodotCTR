@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://snj7kd5273qe"]
 
-[ext_resource type="Script" uid="uid://bgoj6qplekri7" path="res://addons/godotWad/src/thingScripts/collectable.gd" id="1"]
-[ext_resource type="Script" uid="uid://4h1d3l6mp1pc" path="res://addons/godotWad/scenes/dropper.gd" id="2_m4erd"]
+[ext_resource type="Script" uid="uid://bgoj6qplekri7" path="res://addons/gameAssetImporter/scenes/collectable/collectable.gd" id="1"]
+[ext_resource type="Script" uid="uid://4h1d3l6mp1pc" path="res://addons/gameAssetImporter/scenes/dropper/dropper.gd" id="2_m4erd"]
 
 [sub_resource type="BoxShape3D" id="2"]
 size = Vector3(2, 0.940716, 1.1485)

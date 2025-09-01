@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cixny43xek8kd"
-path="res://.godot/imported/icon_GUI_hsplitter.svg-c6097ad02f4c810e4ed2032272d17a83.ctex"
+path="res://.godot/imported/icon_GUI_hsplitter.svg-c5f8efc568c70e116f8fdc905e750c1a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/gsheet/scenes/spreadsheet/assets/icon_GUI_hsplitter.svg"
-dest_files=["res://.godot/imported/icon_GUI_hsplitter.svg-c6097ad02f4c810e4ed2032272d17a83.ctex"]
+source_file="res://addons/gSheet/scenes/spreadsheet/assets/icon_GUI_hsplitter.svg"
+dest_files=["res://.godot/imported/icon_GUI_hsplitter.svg-c5f8efc568c70e116f8fdc905e750c1a.ctex"]
 
 [params]
 

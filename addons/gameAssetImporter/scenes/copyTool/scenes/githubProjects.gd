@@ -11,6 +11,7 @@ func _ready():
 
 func _on_http_request_request_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray) -> void:
 	var repos : PackedStringArray = []
+	var apiLimit = false
 	
 	if response_code == 200:
 		var json = JSON.parse_string(body.get_string_from_utf8())
@@ -22,34 +23,107 @@ func _on_http_request_request_completed(result: int, response_code: int, headers
 	else:
 		if response_code == 403:
 			$VBoxContainer/Msg.text = "Api limit reached"
-		print("Failed with HTTP code: ", response_code)
+			apiLimit = true
+		else:
+			print("Failed with HTTP code: ", response_code)
 		
+	
+	
+	if !repos.is_empty():
+		logRepoList(repos)
+	
+	
+	
+	
+	if repos.is_empty():
+		if FileAccess.file_exists("user://repoLog.txt"):
+			var file = FileAccess.open("user://repoLog.txt",FileAccess.READ)
+			
+			if file == null:
+				print_debug("Could not open repo log")
+				return
+			
+			while !file.eof_reached():
+				var line = file.get_line()
+				if !line.is_empty():
+					repos.append(line)
+				
+			
+	
+		else:
+			print_debug("No repo log exists")
+			return
+	
 	populateList(repos)
 	
 	
 	
+	var allBranches = []
 	for repoIdx in repos.size():
+		
+		if apiLimit : break
+		
 		var repoName =repos[repoIdx]
 		var request = "https://api.github.com/repos/DataPlusProgram/%s/branches" % repoName
 		$BranchRequest.request(request)
 		await $BranchRequest.request_completed
 		var branches = latestBranch
 		
+		if latestBranch.is_empty():
+			break
 		
+		
+		
+			
+		var localBranches = []
 		var ob : OptionButton = %projectList.get_node(repoName)
 		
 		for branch in branches:
 			ob.add_item(branch["name"])
-		
+			localBranches.append(branch["name"])
+			
+		allBranches.append(localBranches)
 		latestBranch = []
+		
+		
+			
+	%projectList.columns = 4
+	for i in %projectList.get_children():
+		i.visible = true
+		
+	
 				
+	if allBranches.size() == repos.size():
+		logBranchList(allBranches)
+		return
 		
+	if apiLimit:
+		allBranches = []
+		if FileAccess.file_exists("user://branchLog.txt"):
+			var file = FileAccess.open("user://branchLog.txt",FileAccess.READ)
+						
+			if file == null:
+				print_debug("Could not open branch log")
+				return
+						
+			while !file.eof_reached():
+				var line = file.get_line()
+						
+				if !line.is_empty():
+					allBranches.append(str_to_var(line))
+				
+			for i in repos:
+				var ob : OptionButton = %projectList.get_node(i)
+				ob.add_item(i)
+			
+			%projectList.columns = 4
+			for i in %projectList.get_children():
+				i.visible = true
+				
+	
 		
-		%projectList.columns = 4
-		for i in %projectList.get_children():
-			i.visible = true
 	
-	
+
 
 	
 func populateList(repos : PackedStringArray):
@@ -82,7 +156,7 @@ var latestBranch = []
 
 func _on_download_request_request_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray) -> void:
 	if response_code != 200:
-		EGLO.displayNotice(self,"Error: " + str(response_code))
+		EGLO.showMessage(self,"Error: " + str(response_code))
 		return
 		
 	var zipBytes : PackedByteArray = body
@@ -97,8 +171,15 @@ func _on_download_request_request_completed(result: int, response_code: int, hea
 	
 	var reader = ZIPReader.new()
 	var err = reader.open(desktop+"/repo.zip")
-	extract_all_from_zip(reader,desktop + "/john")
-	breakpoint
+	extract_all_from_zip(reader,desktop + "/git")
+	
+	if %Inject.button_pressed:
+		var template = FileAccess.open("res://addons/gameAssetImporter/scenes/copyTool/scenes/godot4projectTemplate.txt",FileAccess.READ).get_as_text()
+		var output = template % ["project"]
+		var projectFile := FileAccess.open(desktop + "/git/project.godot",FileAccess.WRITE)
+		projectFile.store_string(output)
+		projectFile.close()
+	
 	
 func extract_all_from_zip(reader,destDir):
 	
@@ -140,4 +221,21 @@ func _on_branch_request_request_completed(result:  int, response_code:  int, hea
 		
 	
 	latestBranch.reverse()
+	
+
+func logRepoList(repos):
+	var file = FileAccess.open("user://repoLog.txt",FileAccess.WRITE)
+	for i in repos:
+		file.store_line(i)
+	
+	file.close()
+	 
+	
+	
+func logBranchList(branches):
+	var file = FileAccess.open("user://branchLog.txt",FileAccess.WRITE)
+	for i in branches:
+		file.store_line(str(i))
+	
+	file.close()
 	

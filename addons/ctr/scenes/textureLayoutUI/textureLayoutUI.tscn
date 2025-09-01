@@ -1,0 +1,321 @@
+[gd_scene load_steps=2 format=3 uid="uid://cggnh7bgmmefa"]
+
+[ext_resource type="Script" uid="uid://dsqun3r28xiuv" path="res://addons/ctr/scenes/textureLayoutUI/texture_layout_ui.gd" id="1_4eajs"]
+
+[node name="TextureLayoutUi" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_4eajs")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 7
+theme_override_constants/margin_top = 7
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="GridContainer" type="GridContainer" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="UV1" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 4
+metadata/_edit_lock_ = true
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/GridContainer/UV1"]
+layout_mode = 2
+text = "uv1"
+
+[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/GridContainer/UV1"]
+modulate = Color(0.35499275, 0.48071906, 1, 1)
+layout_mode = 2
+text = "x"
+horizontal_alignment = 2
+
+[node name="uv1x" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer/GridContainer/UV1"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 255.0
+
+[node name="Label3" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/GridContainer/UV1"]
+modulate = Color(0, 1, 0.6166668, 1)
+layout_mode = 2
+text = "y"
+horizontal_alignment = 2
+
+[node name="uv1y" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer/GridContainer/UV1"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 255.0
+
+[node name="UV2" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+metadata/_edit_lock_ = true
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/GridContainer/UV2"]
+layout_mode = 2
+text = "uv2"
+
+[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/GridContainer/UV2"]
+modulate = Color(0.35499275, 0.48071906, 1, 1)
+layout_mode = 2
+text = "x"
+horizontal_alignment = 2
+
+[node name="uv2x" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer/GridContainer/UV2"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 255.0
+
+[node name="Label3" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/GridContainer/UV2"]
+modulate = Color(0, 1, 0.6166668, 1)
+layout_mode = 2
+text = "y"
+horizontal_alignment = 2
+
+[node name="uv2y" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer/GridContainer/UV2"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 255.0
+
+[node name="UV3" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+metadata/_edit_lock_ = true
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/GridContainer/UV3"]
+layout_mode = 2
+text = "uv3"
+
+[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/GridContainer/UV3"]
+modulate = Color(0.35499275, 0.48071906, 1, 1)
+layout_mode = 2
+text = "x"
+horizontal_alignment = 2
+
+[node name="uv3x" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer/GridContainer/UV3"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 255.0
+
+[node name="Label3" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/GridContainer/UV3"]
+modulate = Color(0, 1, 0.6166668, 1)
+layout_mode = 2
+text = "y"
+horizontal_alignment = 2
+
+[node name="uv3y" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer/GridContainer/UV3"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 255.0
+
+[node name="UV4" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+metadata/_edit_lock_ = true
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/GridContainer/UV4"]
+layout_mode = 2
+text = "uv4"
+
+[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/GridContainer/UV4"]
+modulate = Color(0.35499275, 0.48071906, 1, 1)
+layout_mode = 2
+text = "x"
+horizontal_alignment = 2
+
+[node name="uv4x" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer/GridContainer/UV4"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 255.0
+
+[node name="Label3" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/GridContainer/UV4"]
+modulate = Color(0, 1, 0.6166668, 1)
+layout_mode = 2
+text = "y"
+horizontal_alignment = 2
+
+[node name="uv4y" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer/GridContainer/UV4"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 255.0
+
+[node name="Texture" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+texture_filter = 1
+custom_minimum_size = Vector2(171.85, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+stretch_mode = 4
+
+[node name="GridContainer2" type="GridContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+columns = 5
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2"]
+layout_mode = 2
+text = "Page Cord"
+
+[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2"]
+modulate = Color(0.35686275, 0.48235294, 1, 1)
+layout_mode = 2
+text = "x"
+
+[node name="pagelX" type="SpinBox" parent="MarginContainer/VBoxContainer/GridContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 1000.0
+
+[node name="Label3" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2"]
+modulate = Color(0, 1, 0.6156863, 1)
+layout_mode = 2
+text = "y"
+
+[node name="pagelY" type="SpinBox" parent="MarginContainer/VBoxContainer/GridContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 1000.0
+
+[node name="Label4" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2"]
+layout_mode = 2
+text = "Palette position   "
+
+[node name="Label5" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2"]
+modulate = Color(0.35686275, 0.48235294, 1, 1)
+layout_mode = 2
+text = "x"
+
+[node name="palX" type="SpinBox" parent="MarginContainer/VBoxContainer/GridContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 1000.0
+
+[node name="Label6" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2"]
+modulate = Color(0, 1, 0.6156863, 1)
+layout_mode = 2
+text = "y"
+
+[node name="palY" type="SpinBox" parent="MarginContainer/VBoxContainer/GridContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 1000.0
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+text = "Bits per pixel "
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+theme_override_constants/margin_left = 41
+
+[node name="bpp" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+editable = false
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+modulate = Color(1, 1, 1, 0.2627451)
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+text = "VRAM position "
+
+[node name="Label5" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+modulate = Color(0.36, 0.488, 1, 0.41960785)
+layout_mode = 2
+text = "x"
+
+[node name="vramX" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 9999.0
+editable = false
+
+[node name="Label6" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+modulate = Color(0, 1, 0.6166668, 0.18431373)
+layout_mode = 2
+text = "y"
+
+[node name="vramY" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 9999.0
+editable = false
+
+[node name="Label7" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+modulate = Color(1, 1, 1, 0.18431373)
+layout_mode = 2
+text = "width"
+
+[node name="vramWidth" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 99999.0
+editable = false
+
+[node name="Label8" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+modulate = Color(1, 1, 1, 0.18431373)
+layout_mode = 2
+text = "height"
+
+[node name="vramHeight" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 999999.0
+editable = false
+
+[node name="Label2" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 13
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/Label2"]
+layout_mode = 2
+text = "VRM path"
+
+[node name="VRMpath" type="LineEdit" parent="MarginContainer/VBoxContainer/Label2"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(513.29, 0)
+layout_mode = 2
+editable = false
+
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+modulate = Color(1, 1, 1, 0.2627451)
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Colors"
+
+[node name="PaletteContainer" type="HFlowContainer" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="HSeparator3" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+modulate = Color(1, 1, 1, 0.2627451)
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[connection signal="gui_input" from="MarginContainer/VBoxContainer/HBoxContainer/Texture" to="." method="_on_texture_gui_input"]

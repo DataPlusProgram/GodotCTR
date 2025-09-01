@@ -1,0 +1,788 @@
+[gd_scene load_steps=8 format=3 uid="uid://cy5ev7l3hdosn"]
+
+[ext_resource type="Script" uid="uid://cot60mnxp5kl3" path="res://addons/ctr/scenes/levViewer/levViewer.gd" id="1_qih2i"]
+[ext_resource type="PackedScene" uid="uid://c86ca8w5tvtxl" path="res://addons/gameAssetImporter/scenes/orbCam/orbCam.tscn" id="1_vfvc6"]
+[ext_resource type="PackedScene" uid="uid://db2gn5nk6t2yr" path="res://addons/ctr/CTR_Loader.tscn" id="3_sth5e"]
+[ext_resource type="Script" uid="uid://e3f1ox6y6cvg" path="res://addons/gameAssetImporter/scenes/Gizmo3DScript/gizmo3D.gd" id="4_feltq"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_vfvc6"]
+sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
+ground_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
+
+[sub_resource type="Sky" id="Sky_qih2i"]
+sky_material = SubResource("ProceduralSkyMaterial_vfvc6")
+
+[sub_resource type="Environment" id="Environment_sth5e"]
+background_mode = 2
+sky = SubResource("Sky_qih2i")
+tonemap_mode = 2
+fog_mode = 1
+fog_light_energy = 3.06
+fog_density = 1.0
+fog_aerial_perspective = 0.067
+adjustment_enabled = true
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_qih2i")
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MenuBar" type="MenuBar" parent="VBoxContainer2"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 28.61)
+layout_mode = 2
+
+[node name="Panel" type="Panel" parent="VBoxContainer2/MenuBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer2/MenuBar"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 31.0
+grow_horizontal = 2
+theme_override_constants/separation = 7
+
+[node name="MenuButtonOpen" type="MenuButton" parent="VBoxContainer2/MenuBar/HBoxContainer"]
+unique_name_in_owner = true
+clip_contents = true
+layout_mode = 2
+text = "File"
+item_count = 5
+popup/item_0/text = "BIN"
+popup/item_0/id = 0
+popup/item_1/id = 1
+popup/item_1/separator = true
+popup/item_2/text = "Save to Lev"
+popup/item_2/id = 2
+popup/item_3/text = "Overwrite current ISO"
+popup/item_3/id = 3
+popup/item_4/text = "Close"
+popup/item_4/id = 4
+
+[node name="MenuButtonMap" type="MenuButton" parent="VBoxContainer2/MenuBar/HBoxContainer"]
+unique_name_in_owner = true
+clip_contents = true
+layout_mode = 2
+disabled = true
+text = "Maps"
+item_count = 2
+popup/item_0/text = "Change Map"
+popup/item_0/id = 0
+popup/item_1/text = "Reload Current Map"
+popup/item_1/id = 1
+
+[node name="MenuButtonOptions" type="MenuButton" parent="VBoxContainer2/MenuBar/HBoxContainer"]
+unique_name_in_owner = true
+clip_contents = true
+layout_mode = 2
+text = "Options
+"
+
+[node name="HSplitContainer" type="HSplitContainer" parent="VBoxContainer2"]
+layout_mode = 2
+size_flags_vertical = 3
+split_offset = 900
+
+[node name="ViewportContainer" type="SubViewportContainer" parent="VBoxContainer2/HSplitContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="VBoxContainer2/HSplitContainer/ViewportContainer"]
+unique_name_in_owner = true
+handle_input_locally = false
+size = Vector2i(788, 616)
+render_target_update_mode = 4
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="VBoxContainer2/HSplitContainer/ViewportContainer/SubViewport"]
+environment = SubResource("Environment_sth5e")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="VBoxContainer2/HSplitContainer/ViewportContainer/SubViewport"]
+transform = Transform3D(-0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, 0.75, -0.433013, 0, 0, 0)
+shadow_enabled = true
+
+[node name="orbCam" parent="VBoxContainer2/HSplitContainer/ViewportContainer/SubViewport" instance=ExtResource("1_vfvc6")]
+unique_name_in_owner = true
+zoomMax = 0.0
+clickOnly = true
+MMB_moves = true
+current = true
+dist = 0
+freeView = true
+
+[node name="RayCast3D" type="RayCast3D" parent="VBoxContainer2/HSplitContainer/ViewportContainer/SubViewport"]
+unique_name_in_owner = true
+
+[node name="Gizmo3D" type="Node3D" parent="VBoxContainer2/HSplitContainer/ViewportContainer/SubViewport"]
+script = ExtResource("4_feltq")
+mode = 3
+use_local_space = true
+metadata/_custom_type_script = "uid://e3f1ox6y6cvg"
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer2/HSplitContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 10
+
+[node name="Panel" type="Panel" parent="VBoxContainer2/HSplitContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="Inspector" type="VBoxContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="blockIdx" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="instanceName" type="LineEdit" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector"]
+unique_name_in_owner = true
+layout_mode = 2
+max_length = 16
+
+[node name="PositionLabel" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Position"
+
+[node name="PositionContainer" type="MarginContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/margin_top = 5
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/PositionContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/PositionContainer/HBoxContainer"]
+modulate = Color(1, 0.50217897, 0.43651646, 1)
+layout_mode = 2
+text = "x"
+
+[node name="X" type="SpinBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/PositionContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = -99999.0
+max_value = 999999.0
+custom_arrow_step = 10.0
+
+[node name="Label2" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/PositionContainer/HBoxContainer"]
+modulate = Color(0.487476, 0.9999998, 0.7577463, 1)
+layout_mode = 2
+text = "y"
+
+[node name="Y" type="SpinBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/PositionContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = -99999.0
+max_value = 99999.0
+
+[node name="Label3" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/PositionContainer/HBoxContainer"]
+modulate = Color(0.61027527, 0.6553902, 1, 1)
+layout_mode = 2
+text = "z"
+
+[node name="Z" type="SpinBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/PositionContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = -999999.0
+max_value = 99999.0
+
+[node name="RotationLabel" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Rotation"
+
+[node name="RotationContainer" type="MarginContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/margin_top = 5
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/RotationContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/RotationContainer/HBoxContainer"]
+modulate = Color(1, 0.50217897, 0.43651646, 1)
+layout_mode = 2
+text = "x"
+
+[node name="RX" type="SpinBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/RotationContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = -99999.0
+max_value = 999999.0
+
+[node name="Label2" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/RotationContainer/HBoxContainer"]
+modulate = Color(0.487476, 0.9999998, 0.7577463, 1)
+layout_mode = 2
+text = "y"
+
+[node name="RY" type="SpinBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/RotationContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = -99999.0
+max_value = 99999.0
+
+[node name="Label3" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/RotationContainer/HBoxContainer"]
+modulate = Color(0.61027527, 0.6553902, 1, 1)
+layout_mode = 2
+text = "z"
+
+[node name="RZ" type="SpinBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/RotationContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = -999999.0
+max_value = 99999.0
+
+[node name="ModelContainer" type="HBoxContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ModelLabel" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/ModelContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Model"
+
+[node name="ModelSelect" type="OptionButton" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/ModelContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CheckPointContainer" type="HBoxContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Label" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/CheckPointContainer"]
+layout_mode = 2
+text = "Checkpoint index "
+
+[node name="CheckPointIdx" type="SpinBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/CheckPointContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 255.0
+
+[node name="QuadFlags" type="FoldableContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector"]
+unique_name_in_owner = true
+layout_mode = 2
+title = "Flags       "
+
+[node name="GridContainer" type="GridContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags"]
+layout_mode = 2
+columns = 4
+
+[node name="Label" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+layout_mode = 2
+text = "Invisible"
+
+[node name="Invisible" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+layout_mode = 2
+text = "Trigger Script"
+
+[node name="TriggerScript" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+layout_mode = 2
+text = "Moon Gravity"
+
+[node name="MoonGravity" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label4" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+layout_mode = 2
+text = "Reflection"
+
+[node name="Reflection" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label5" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+layout_mode = 2
+text = "Reverb"
+
+[node name="Reverb" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label6" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+layout_mode = 2
+text = "Wall                 "
+
+[node name="Wall" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label7" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+layout_mode = 2
+text = "Fall Boost"
+
+[node name="FallBoost" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label17" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+layout_mode = 2
+text = "Fall Boost 2"
+
+[node name="FallBoost2" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label8" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+layout_mode = 2
+text = "Out of Bounds"
+
+[node name="OutOfBounds" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label9" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+layout_mode = 2
+text = "?"
+
+[node name="unk1" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label10" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+layout_mode = 2
+text = "?"
+
+[node name="unk2" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label11" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+layout_mode = 2
+text = "Mask Grab"
+
+[node name="MaskGrab" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label12" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+layout_mode = 2
+text = "Temple Door Open"
+
+[node name="TempleDoorOpen" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label13" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+layout_mode = 2
+text = "Collision Trigger"
+
+[node name="CollisionTrigger" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label14" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+layout_mode = 2
+text = "Is Ground"
+
+[node name="IsGround" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label15" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+layout_mode = 2
+text = "No Collision"
+
+[node name="NoCollision" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label16" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+layout_mode = 2
+text = "Invisible Trigger"
+
+[node name="InvisibleTrigger" type="CheckBox" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/QuadFlags/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="TerrainTypeContainer" type="MarginContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/TerrainTypeContainer"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Label" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/TerrainTypeContainer/HBoxContainer"]
+layout_mode = 2
+text = "Terrain Type: "
+
+[node name="TerrainType" type="OptionButton" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/TerrainTypeContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+item_count = 21
+popup/item_0/text = "Asphalt"
+popup/item_0/id = 0
+popup/item_1/text = "Dirt"
+popup/item_1/id = 1
+popup/item_2/text = "Grass"
+popup/item_2/id = 2
+popup/item_3/text = "Wood"
+popup/item_3/id = 3
+popup/item_4/text = "Water"
+popup/item_4/id = 4
+popup/item_5/text = "Stone"
+popup/item_5/id = 5
+popup/item_6/text = "Ice"
+popup/item_6/id = 6
+popup/item_7/text = "Track"
+popup/item_7/id = 7
+popup/item_8/text = "IcyRoad"
+popup/item_8/id = 8
+popup/item_9/text = "Snow"
+popup/item_9/id = 9
+popup/item_10/text = "None"
+popup/item_10/id = 10
+popup/item_11/text = "HardPack"
+popup/item_11/id = 11
+popup/item_12/text = "Metal"
+popup/item_12/id = 12
+popup/item_13/text = "FastWater"
+popup/item_13/id = 13
+popup/item_14/text = "Mud"
+popup/item_14/id = 14
+popup/item_15/text = "SideSlip"
+popup/item_15/id = 15
+popup/item_16/text = "RiverAsphalt"
+popup/item_16/id = 16
+popup/item_17/text = "SteamAsphalt"
+popup/item_17/id = 17
+popup/item_18/text = "OceanAsphalt"
+popup/item_18/id = 18
+popup/item_19/text = "SlowGrass"
+popup/item_19/id = 19
+popup/item_20/text = "SlowDirt"
+popup/item_20/id = 20
+
+[node name="ColorsContainer" type="FoldableContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector"]
+unique_name_in_owner = true
+layout_mode = 2
+title = "Vertex Colors"
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/ColorsContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 100
+theme_override_constants/margin_right = 100
+
+[node name="QuadColors" type="GridContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/ColorsContainer/MarginContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(35.18, 84.075)
+layout_mode = 2
+size_flags_vertical = 4
+columns = 3
+
+[node name="TL" type="ColorPickerButton" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/ColorsContainer/MarginContainer/QuadColors"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "2"
+
+[node name="TM" type="ColorPickerButton" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/ColorsContainer/MarginContainer/QuadColors"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "5"
+
+[node name="TR" type="ColorPickerButton" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/ColorsContainer/MarginContainer/QuadColors"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "0"
+
+[node name="ML" type="ColorPickerButton" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/ColorsContainer/MarginContainer/QuadColors"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "8"
+
+[node name="MM" type="ColorPickerButton" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/ColorsContainer/MarginContainer/QuadColors"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "6"
+
+[node name="MR" type="ColorPickerButton" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/ColorsContainer/MarginContainer/QuadColors"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "4"
+
+[node name="BL" type="ColorPickerButton" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/ColorsContainer/MarginContainer/QuadColors"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "3"
+
+[node name="BM" type="ColorPickerButton" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/ColorsContainer/MarginContainer/QuadColors"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "7"
+
+[node name="BR" type="ColorPickerButton" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/ColorsContainer/MarginContainer/QuadColors"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "1"
+
+[node name="TextureOffsetContainer" type="FoldableContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector"]
+unique_name_in_owner = true
+layout_mode = 2
+folded = true
+title = "Texture Offsets"
+
+[node name="TextureOffsetList" type="ItemList" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/TextureOffsetContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/h_separation = 14
+auto_height = true
+max_columns = 4
+
+[node name="FileDialog" type="FileDialog" parent="."]
+auto_translate_mode = 2
+title = "Open a File"
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.bin")
+use_native_dialog = true
+
+[node name="ctrLoader" parent="." instance=ExtResource("3_sth5e")]
+
+[node name="VBoxContainer" type="Control" parent="."]
+visible = false
+custom_minimum_size = Vector2(490.005, 0)
+layout_mode = 1
+anchors_preset = 13
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -185.0
+offset_top = -1.0
+offset_right = 184.295
+offset_bottom = -1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel2" type="Panel" parent="VBoxContainer/ScrollContainer"]
+modulate = Color(0, 0, 0, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Panel" type="Panel" parent="VBoxContainer/ScrollContainer"]
+modulate = Color(0, 0, 0, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 8
+
+[node name="MapList" type="VBoxContainer" parent="VBoxContainer/ScrollContainer/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 11
+
+[node name="Button" type="Button" parent="VBoxContainer/ScrollContainer/MarginContainer/MapList"]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="SaveLevDialog" type="FileDialog" parent="."]
+auto_translate_mode = 2
+access = 2
+filters = PackedStringArray("*.lev")
+use_native_dialog = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="SaveLevDialog"]
+
+[node name="Label" type="Label" parent="SaveLevDialog/HBoxContainer"]
+layout_mode = 2
+text = "Invisible"
+
+[node name="CheckBox" type="CheckBox" parent="SaveLevDialog/HBoxContainer"]
+layout_mode = 2
+
+[node name="Window" type="Window" parent="."]
+auto_translate_mode = 2
+oversampling_override = 1.0
+position = Vector2i(235, 55)
+size = Vector2i(815, 515)
+visible = false
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Window"]
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.994
+offset_right = -1.0
+offset_bottom = 0.0899963
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="levelPalette" type="GridContainer" parent="Window/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+columns = 168
+
+[node name="OptionsParent" type="Window" parent="."]
+unique_name_in_owner = true
+auto_translate_mode = 2
+oversampling_override = 1.0
+title = "Options"
+initial_position = 4
+size = Vector2i(565, 385)
+visible = false
+exclusive = true
+
+[node name="MarginContainer" type="MarginContainer" parent="OptionsParent"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 1.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 6
+size_flags_vertical = 3
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="GridContainer" type="GridContainer" parent="OptionsParent/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/v_separation = 15
+
+[node name="HBoxContainer" type="HBoxContainer" parent="OptionsParent/MarginContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="OptionsParent/MarginContainer/GridContainer/HBoxContainer"]
+layout_mode = 2
+text = "Allow editing vertex color"
+
+[node name="VertexColorAllow" type="CheckBox" parent="OptionsParent/MarginContainer/GridContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ButtonReverseCheckpoints" type="Button" parent="OptionsParent/MarginContainer/GridContainer"]
+layout_mode = 2
+text = "Reverse Checkpoint Order"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="OptionsParent/MarginContainer/GridContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="OptionsParent/MarginContainer/GridContainer/HBoxContainer2"]
+layout_mode = 2
+text = "Serial"
+
+[node name="Serial" type="LineEdit" parent="OptionsParent/MarginContainer/GridContainer/HBoxContainer2"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(151.285, 0)
+layout_mode = 2
+max_length = 10
+
+[node name="SerialRewriteButton" type="Button" parent="OptionsParent/MarginContainer/GridContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Write Serial"
+
+[connection signal="pressed" from="VBoxContainer2/MenuBar/HBoxContainer/MenuButtonOptions" to="." method="_on_menu_button_options_pressed"]
+[connection signal="gui_input" from="VBoxContainer2/HSplitContainer/ViewportContainer" to="." method="_on_viewport_container_gui_input"]
+[connection signal="text_submitted" from="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/instanceName" to="." method="_on_instance_name_text_submitted"]
+[connection signal="value_changed" from="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/PositionContainer/HBoxContainer/X" to="." method="_on_x_value_changed"]
+[connection signal="value_changed" from="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/PositionContainer/HBoxContainer/Y" to="." method="_on_y_value_changed"]
+[connection signal="value_changed" from="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/PositionContainer/HBoxContainer/Z" to="." method="_on_z_value_changed"]
+[connection signal="value_changed" from="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/RotationContainer/HBoxContainer/RX" to="." method="_on_rx_value_changed"]
+[connection signal="value_changed" from="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/RotationContainer/HBoxContainer/RY" to="." method="_on_ry_value_changed"]
+[connection signal="value_changed" from="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/RotationContainer/HBoxContainer/RZ" to="." method="_on_rz_value_changed"]
+[connection signal="item_selected" from="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/ModelContainer/ModelSelect" to="." method="_on_model_select_item_selected"]
+[connection signal="value_changed" from="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/CheckPointContainer/CheckPointIdx" to="." method="_on_check_point_idx_value_changed"]
+[connection signal="item_selected" from="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/TerrainTypeContainer/HBoxContainer/TerrainType" to="." method="_on_terrain_type_item_selected"]
+[connection signal="file_selected" from="FileDialog" to="." method="_on_file_dialog_file_selected"]
+[connection signal="file_selected" from="SaveLevDialog" to="." method="_on_save_lev_dialog_file_selected"]
+[connection signal="close_requested" from="OptionsParent" to="." method="_on_options_parent_close_requested"]
+[connection signal="toggled" from="OptionsParent/MarginContainer/GridContainer/HBoxContainer/VertexColorAllow" to="." method="_on_vertex_color_allow_toggled"]
+[connection signal="pressed" from="OptionsParent/MarginContainer/GridContainer/ButtonReverseCheckpoints" to="." method="_on_button_reverse_checkpoints_pressed"]
+[connection signal="pressed" from="OptionsParent/MarginContainer/GridContainer/HBoxContainer2/SerialRewriteButton" to="." method="_on_serial_rewrite_button_pressed"]

@@ -4,27 +4,27 @@ extends Node3D
 
 
 @onready var par = $"../"
-@export var zoomSens : float = 1
-@export var zoomMin : float = 1
-@export var zoomMax : float = 100
-@export var clickOnly = false
-@export var middleMouseZoom = false
-@export var hijackParentYaw = false
-@export var allowPan = false
+@export var zoomSens : float = 1 ## The sensitivty of the zoom
+@export var zoomMin : float = 1 ## The zoom minimum
+@export var zoomMax : float = 100 ## The maximum zoom
+@export var clickOnly = false ## You need to right click to pan camera 
+@export var middleMouseZoom = false ## Can zoom with middle mouse button
+@export var MMB_moves = false ## Middle mouse button will translate the camera
 @export var current = false
-@export var collides = false
-@export var yawRange = Vector2(-88,88)
+@export var collides = false ## Not yet implimented
+@export var yawRange = Vector2(-88,88) 
 @export var initialRot = Vector2(0,0)
 @export var offset = Vector2(0,0)
 @export var processInput = true
 @export var fov = 70: set = fovChange
 @export var dist = 14
 @export var lock := false
-@export var freeView := false
-
+@export var freeView := false #no clip
+@export var scaleMovementBasedOnZoom := false
+@export var drawOrigin : bool = false: set = setDrawOrigin
 var rotH : float = 0.0
 var rotV : float = 0.0
-var beingCaputred := false
+var beingCaptured : bool = false
 @export var sensH : float  = 0.25
 @export var sensV : float = 0.25
 
@@ -75,25 +75,36 @@ func _ready():
 	if !InputMap.has_action("raise"): InputMap.add_action("raise")
 	if !InputMap.has_action("lower"): InputMap.add_action("lower")
 	
+	if !InputMap.has_action("raise"): InputMap.add_action("raise")
+	if !InputMap.has_action("lower"): InputMap.add_action("lower")
+	
+	if !InputMap.has_action("shiftModifier"): InputMap.add_action("shiftModifier")
+	if !InputMap.has_action("altModifier"): InputMap.add_action("altModifier")
+	
+
 
 
 func attachNodeRotation( node : Node):
 	pitch.remote_path =pitch.get_path_to(node)
-	
+
+
+
 func _input(event):
 	if processInput == false:
+		return
+	
+	if par.process_mode == 4 and !beingCaptured:
 		return
 	
 	if lock:
 		return
 	
-
+	
 	if !(event is InputEventMouseButton) and !(event is InputEventMouseMotion):
 		return
 	
 	
-	if event is InputEventMouseButton:
-		
+	if event is InputEventMouseButton and  par.process_mode != 4:
 		if event.button_index == 4:
 			dist = max(zoomMin,dist-zoomSens)
 		
@@ -102,10 +113,7 @@ func _input(event):
 		
 			
 	if event is InputEventMouseMotion:
-		
-		
-		
-		if (clickOnly and Input.is_mouse_button_pressed(2)) or !clickOnly:
+		if (clickOnly and beingCaptured) or !clickOnly:
 				
 			rotH += -event.relative.x * sensH
 			rotV += -event.relative.y * sensV
@@ -113,9 +121,10 @@ func _input(event):
 
 		
 			
-		if allowPan and Input.is_mouse_button_pressed(3):
-			position.x += (event.relative.x * sensH)
-			position.y += -event.relative.y * sensV 
+		if MMB_moves and Input.is_mouse_button_pressed(3):
+			var move_vector = (event.relative.x * sensH) * cam.global_transform.basis.x
+			move_vector += (event.relative.y * sensV) * -cam.global_transform.basis.y
+			translate(move_vector)
 			
 
 			
@@ -123,6 +132,9 @@ func _input(event):
 
 
 func fovChange(ifov):
+	
+
+	
 	if ifov != null and cam != null:
 		cam.fov = ifov
 
@@ -154,30 +166,44 @@ func _process(delta):
 			i.rotation.x = pitch.rotation.x
 			#
 	
+	var speedAdjust = max(1,dist)
+	
+	if !scaleMovementBasedOnZoom:
+		speedAdjust = 10
+	
+	var shiftModifier = 1
+	if  int(Input.is_action_pressed("shiftModifier")):
+		shiftModifier = 3
+	
+	if int(Input.is_action_pressed("altModifier")):
+		shiftModifier = 0.5
+		
 	
 	if freeView:
 		if Input.is_action_pressed("forward"):
-			position += -cam.global_basis.z * movementSens * delta * max(1,dist)
+			position += -cam.global_basis.z * movementSens * delta * speedAdjust * shiftModifier
 
 		if Input.is_action_pressed("backward"):
-			position += cam.global_basis.z * movementSens * delta *  max(1,dist)
+			position += cam.global_basis.z * movementSens * delta *  speedAdjust * shiftModifier
 			
 		if Input.is_action_pressed("left"):
-			position -= cam.global_basis.x * movementSens * delta *  max(1,dist)
+			position -= cam.global_basis.x * movementSens * delta * speedAdjust * shiftModifier
 			
 		if Input.is_action_pressed("right"):
-			position +=cam.global_basis.x * movementSens * delta *  max(1,dist)
+			position +=cam.global_basis.x * movementSens * delta *  speedAdjust * shiftModifier
 		
 		if Input.is_action_pressed("raise"):
-			position +=cam.global_basis.y * movementSens * delta *  max(1,dist) * 0.8
+			position +=cam.global_basis.y * movementSens * delta * speedAdjust * 0.8  * shiftModifier
 		
 		if Input.is_action_pressed("lower"):
-			position -=cam.global_basis.y * movementSens * delta *  max(1,dist)* 0.8
+			position -=cam.global_basis.y * movementSens * delta *  speedAdjust * 0.8  * shiftModifier
 
 	pingTransforms()
  
 func _physics_process(delta):
 	
+	if Engine.is_editor_hint():
+		return
 	
 	sensH = SETTINGS.getSetting(get_tree(),"mouseSens")
 	sensV = SETTINGS.getSetting(get_tree(),"mouseSens")
@@ -204,16 +230,21 @@ func _physics_process(delta):
 	
 	pYawTransform = yaw.transform
 	pPitchTransform = pitch.transform
+
 	
+	if processInput == false:
+		return
 	
-	if (clickOnly and Input.is_mouse_button_pressed(2)):
-		if ! beingCaputred:
-			beingCaputred = true
+	if (clickOnly and Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT)):
+		if beingCaptured == false:
+			beingCaptured = true
+			
+			#Input.mouse_mode = Input.MOUSE_MODE_CONFINED
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	
-	if beingCaputred and !Input.is_mouse_button_pressed(2):
+	if beingCaptured and !Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-		beingCaputred = false
+		beingCaptured = false
 
 func getCamera():
 	return $h/v/Camera3D
@@ -247,4 +278,28 @@ func pingTransforms():
 	$h/v/Camera3D.force_update_transform()
 	
 			
+var originSphere : Node3D = null
+
+func setDrawOrigin(value : bool):
+	drawOrigin = value
 	
+	var doesSphereExist := false
+	
+	if drawOrigin != null:
+		if is_instance_valid(originSphere):
+				doesSphereExist = true
+		
+	if drawOrigin == false:
+		if doesSphereExist == true:
+			originSphere.queue_free()
+			originSphere = null
+		return
+		
+	if drawOrigin == true:
+		originSphere = CSGSphere3D.new()
+		originSphere.radius = 0.1
+		add_child(originSphere)
+		
+	if drawOrigin:
+		originSphere
+		

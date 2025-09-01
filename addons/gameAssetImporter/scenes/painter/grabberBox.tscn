@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3 uid="uid://buixt52yhknkc"]
+
+[ext_resource type="Script" uid="uid://dcpjigo5n3cbn" path="res://addons/gameAssetImporter/scenes/painter/grabber_box.gd" id="1_0wcee"]
+[ext_resource type="Texture2D" uid="uid://diw3w17fgw7po" path="res://addons/gameAssetImporter/scenes/painter/grabberBox.png" id="1_2x7td"]
+
+[node name="GrabberBox" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 2
+script = ExtResource("1_0wcee")
+
+[node name="NinePatchRect" type="NinePatchRect" parent="."]
+texture_filter = 1
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.044194445
+anchor_bottom = 0.060925927
+offset_right = 0.08799982
+offset_bottom = 0.5199995
+mouse_filter = 0
+mouse_default_cursor_shape = 10
+texture = ExtResource("1_2x7td")
+region_rect = Rect2(0, 0, 3, 3)
+patch_margin_left = 2
+patch_margin_top = 2
+patch_margin_right = 2
+patch_margin_bottom = 2
+metadata/_edit_use_anchors_ = true
+
+[connection signal="gui_input" from="." to="." method="_on_gui_input"]
+[connection signal="gui_input" from="NinePatchRect" to="." method="_on_nine_patch_rect_gui_input"]
+[connection signal="mouse_entered" from="NinePatchRect" to="." method="_on_nine_patch_rect_mouse_entered"]

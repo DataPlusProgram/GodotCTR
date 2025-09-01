@@ -166,13 +166,11 @@ script = ExtResource("1_0jgmu")
 [node name="SubViewport" type="SubViewport" parent="v3/preview/MarginContainer/SubViewportContainer"]
 unique_name_in_owner = true
 world_3d = SubResource("World3D_j03yw")
-handle_input_locally = false
 size = Vector2i(548, 452)
 render_target_update_mode = 4
 
 [node name="CameraTopDown" parent="v3/preview/MarginContainer/SubViewportContainer/SubViewport" instance=ExtResource("3_txwmj")]
 clickOnly = true
-allowPan = true
 yawRange = Vector2(-90, 90)
 initialRot = Vector2(0, -90)
 dist = 42
@@ -181,7 +179,6 @@ freeView = true
 [node name="Camera3D" parent="v3/preview/MarginContainer/SubViewportContainer/SubViewport" instance=ExtResource("3_txwmj")]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
 clickOnly = true
-allowPan = true
 current = true
 yawRange = Vector2(-90, 90)
 initialRot = Vector2(0, -22)

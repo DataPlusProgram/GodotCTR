@@ -113,14 +113,14 @@ func is_ignored(path: String) -> bool:
 
 func _on_addon_dir_button_pressed() -> void:
 	
-	OS.shell_open(%addonsPath.text)	
-	pass # Replace with function body.
+	OS.shell_open(%addonsPath.text)
+	
 
 
 func _on_sym_text_pressed() -> void:
 	var cmd = 'mklink /D "%s/" ""' % [%addonsPath.text]
 	DisplayServer.clipboard_set(cmd)
-	pass # Replace with function body.
+
 
 
 func _on_copy_button_pressed() -> void:
@@ -160,3 +160,12 @@ func _on_copy_button_pressed() -> void:
 	dialogue.canceled.connect(OS.shell_open.bind(destPath+root))
 	
 	%CopyButton.disabled = false
+
+
+func _on_button_4_pressed() -> void:
+	var destPath = %path2.get_node("h/pathTxt").text
+	
+	if destPath == "desktop":
+		destPath = OS.get_system_dir(OS.SYSTEM_DIR_DESKTOP)
+	
+	OS.shell_open(destPath)

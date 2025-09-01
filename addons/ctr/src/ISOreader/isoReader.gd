@@ -1,3 +1,4 @@
+@tool
 class_name ISO
 extends Node
 
@@ -8,7 +9,7 @@ var directory : Dictionary = {}
 var fileEntries = {}
 var binMode = false
 var mutex : Mutex = Mutex.new()
-
+var volumeIdOffset := -1
 @onready var binLoader = $BinReader
 @onready var binData :PackedByteArray = binLoader.sectorDataArray
 
@@ -37,17 +38,34 @@ class FileEntry:
 
 
 func initialize(path : StringName):
-	var file : FileAccess = FileAccess.open(path,FileAccess.READ_WRITE)
-	var err = FileAccess.get_open_error()
+	
+	
+	
+	print("opening bin:",path)
+	
 	
 	if path.get_extension() == "bin":
-		ISOfile.binMode = true
-		$"BinReader".getBinData(path)
-		ISOfile.binFile = binLoader.sectorDataArray
+		#ISOfile.binMode = ISOfile.BIN_MODE.BUFFER
+		#ISOfile.binFilePath = path
+		#$"BinReader".getBinData(path)
+		#SOfile.binByteArray = binLoader.sectorDataArray
+		
+		
+		ISOfile.binMode = ISOfile.BIN_MODE.DISK
+		ISOfile.file = FileAccess.open(path,FileAccess.READ_WRITE)
+		
 	else:
-		ISOfile.file = file
+		ISOfile.BIN_MODE.NONE
+
+		ISOfile.file =  FileAccess.open(path,FileAccess.READ_WRITE)
+		
+		
+	var err = FileAccess.get_open_error()
+	
 	if err != 0:
 		print_debug("Couldn't open iso file error:",err)
+		EGLO.showMessage(get_tree().get_root(),"Could not open file. Another program may be using it.")
+		return []
 	
 	ISOfile.seek(0x8000)
 	
@@ -88,10 +106,17 @@ func initialize(path : StringName):
 	
 	files = fileList
 	directory = isoDirectoryStucture
-	ISOfile.file = file
+	#ISOfile.file = file
 	fileEntries = fileList
 	return [fileList,isoDirectoryStucture]
-	
+
+func close():
+	ISOfile.file.close()
+	files  = {}
+	directory = {}
+	fileEntries = {}
+	binMode = false
+
 
 func getDataAtPosition(pos : int,numBytes : int) -> PackedByteArray:
 	mutex.lock()
@@ -106,7 +131,12 @@ func getFileData(path : String) -> PackedByteArray:
 	var data := ISOfile.get_buffer(entry[0])
 	return data
 
-func seekToFileAndReturnSize(path:String):
+func seekToFileAndReturnSize(path:String) -> int:
+	
+	if !files.has(path):
+		print_debug("file not found in iso: %s"%[path])
+		return -1
+	
 	var entry := files[path]
 	ISOfile.seek(entry[1])
 	return entry[0]
@@ -121,9 +151,9 @@ func parsePrimaryVolumeDescriptor(file : ISOFileWrapper):
 	var descriptorVersion = file.get_8()
 	file.get_8()#unused
 	var systemName = file.get_buffer(32).get_string_from_ascii()
+	volumeIdOffset = file.get_position()
 	var volumeId = file.get_buffer(32).get_string_from_ascii()
 	file.get_buffer(8)
-	
 	var volumeSpaceSizeLSB = file.get_32()
 	var volumeSpaceSizeMSB = file.get_32()
 	file.get_buffer(32)
@@ -308,16 +338,11 @@ func parseDirectory2(file : ISOFileWrapper,size : int):
 		var volumeSequenceNumberMSB = file.get_16()
 		var lengthOfFilename = file.get_8()
 		
-		#var b = file.get_8()
-		
-		
-		
-		
+
 		var fileName = file.get_buffer(lengthOfFilename).get_string_from_ascii()
 		
 		if lengthOfFilename % 2 != 0:
 			file.get_8()
-		
 		
 		
 		if (fileFlags & 0x02) == 0:

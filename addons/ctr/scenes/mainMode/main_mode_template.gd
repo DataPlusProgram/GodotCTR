@@ -58,20 +58,7 @@ func gotoMap(map : Node):
 	ent.position = startPosArr[0]
 	map.add_child(ent)
 	
-	for i in startPosArr.size():
-		var mesh = CSGBox3D.new()
-		var circle = CSGSphere3D.new()
-		
-		circle.radius = 0.1
-		circle.position.z = -0.8
-		mesh.add_child(circle)
-		
-		mesh.position = startPosArr[i]
-		mesh.rotation_degrees = startRotArr[i]
-		
-	   # print(mesh.rotation_degrees)
-		
-		map.add_child(mesh)
+	
 	
 	var vis = ent.get_node("visual") 
 	#rot.y = -rot.y 
@@ -91,6 +78,7 @@ func levelSelected(levelPath):
 	#pass
 	#var map = ENTG.createMap(levelPath,get_tree(),"")
 	levelSelect.visible = false
+	#mapStorage.append(ENTG.createMap(levelPath,get_tree(),""))
 	ENTG.createMapThreaded(levelPath,get_tree(),"",mapStorage)
 	
 

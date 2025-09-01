@@ -42,14 +42,17 @@ func _process(delta: float) -> void:
 
 func _physics_process(delta: float) -> void:
 	
+	
 	if !isReady:
 		return
 		
 	var groundNormal = $movement.groundNormal
 	
+	print($movement.onGround)
+	
 	if  groundNormal.length() != 0 and groundNormal.length() != INF:
 		var angle = acos(groundNormal.dot(Vector3.UP))
-		model.rotation.x =  -angle
+		#model.rotation.x =  -angle
 		
 
 	var xz = XZ(velocity)

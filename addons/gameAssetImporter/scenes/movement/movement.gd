@@ -32,6 +32,7 @@ enum SLOPESPEED{
 @onready var par : Node3D = null 
 @onready var parHasCamOffset : bool
 @export var groundEmergeFix : bool = false
+@export var debug : bool = false
 
 
 @onready var colShapeOffset = Vector3.ZERO
@@ -155,6 +156,8 @@ var normalSphere = null
 
 func move(delta : float) -> void:
 	
+	if debug:
+		%debug.text = ""
 	
 	if normalSphere != null:
 		normalSphere.queue_free()
@@ -166,6 +169,8 @@ func move(delta : float) -> void:
 	var iY : float = global_position.y
 	var velocity : Vector3 = get_parent().velocity
 	var headBonk : bool = false
+	
+	
 	
 	groundNormal = Vector3.ZERO
 	interplateThisFrame = false
@@ -206,10 +211,15 @@ func move(delta : float) -> void:
 		if !touching.has(col):
 			touchChange = true
 	
+	
+	
 	if touchChange:
 		touching = []
 		touchingPos = []
 		hitWallLastFrame = false
+	
+	
+	
 	
 	prevPos = global_position
 	par.pOnGround = onGround
@@ -225,52 +235,15 @@ func move(delta : float) -> void:
 	
 	if XZ(velocity).length_squared() > 0.001 or touchChange:
 		colliders = moveXZ(remainingVelo,delta)
+		
+	elif debug:
+		%debug.text += "No XY move\n"
 	
 	
 	if !onGround or velocity.y > 0.001:
+		velocity = moveY(delta,velocity,pOnGround,headBonk)
+		
 
-		velocity.y -= gravity*delta
-		
-		if get_parent().pOnGround == true :#initial tick of leaving the ground doubles gravity
-			velocity.y -= gravity*delta
-		
-		
-		var col : KinematicCollision3D= get_parent().move_and_collide(Vector3(0,velocity.y*delta,0))
-		
-		if pOnGround and velocity.y <= 0:#this is snapping down small amounts such a when going down stairs
-			footCast.enabled = true
-			footCast.force_shapecast_update()
-			
-			for i in footCast.get_collision_count():
-				
-				var amt = stepAmt#stepRatio*par.height
-				var h = global_position.y - footCast.get_collision_point(i).y
-				
-				if !touching.has(footCast.get_collider(i)):
-					touching.append(footCast.get_collider(i))
-					touchingPos.append(footCast.get_collider(i).global_position)
-				
-				if h <= snapDownAmt:
-					var c =  par.move_and_collide(Vector3(0,-snapDownAmt,0))
-					interplateThisFrame = true
-					if c!= null:
-						col = c
-				
-		if col != null:
-			if (global_position.y-col.get_position(0).y+mostRecentFloor.y) > 0.0:#point needs to be below us
-				var angle =  col.get_normal(0)
-				if !touching.has(col.get_collider()):
-						touching.append(col.get_collider())
-						touchingPos.append(col.get_collider().global_position)
-				
-				if isNormalStandable(angle):
-					var point = col.get_position(0)
-					mostRecentFloor =Vector3(point.x, get_parent().position.y+ colShapeOffset.y,point.z) - get_parent().position  + colShapeOffset
-			else:
-				headBonk = true
-		else:#if we have no collision after moving on the y axis 
-			onGround = false
-	
 	
 	if onGround and touchChange:
 		
@@ -307,12 +280,22 @@ func move(delta : float) -> void:
 	par.velocity = velocity
 	
 	
+	if debug:
+		%debug.text += "OnGround:%s" %[onGround] 
+	
+	#if touchChange and pOnGround == true and onGround == false:
+	#	breakpoint
 	#EGLO.drawSphere($/root,mostRecentFloor+global_position)#make sure this is on the floor
 	
 
 var endFlag = false
 
 func hitWall(normalDeg,delta : float,point : Vector3,isOnGround,velo : Vector3,objectsHit : Array[Node3D]) -> Vector3:
+	
+	
+	if debug:
+		%debug.text += "HIT WALL\n"
+	
 	if endFlag:
 		return velo
 
@@ -359,8 +342,13 @@ func hitWall(normalDeg,delta : float,point : Vector3,isOnGround,velo : Vector3,o
 	
 		
 	if !highCast.is_colliding():
+		if debug:
+			%debug.text += "-High cast has NO collision, cannot step up.\n"
 		return velo
-		
+	
+	
+	if debug:
+		%debug.text += "-High cast has collision\n"
 		
 	var destY: float =  -INF
 
@@ -385,7 +373,9 @@ func hitWall(normalDeg,delta : float,point : Vector3,isOnGround,velo : Vector3,o
 	lowestCeil = result[1] #high cast found a ceiling. Returns the lowest ciel or inf if none fond. This might not be guarenteed to be an actual ciel 
 	
 	
-	if destY == -INF:#high cast didnt hit anything, In theory high would always hit something in this case it's seems its getting a floor normal for some reason
+	if destY == -INF:#high cast didnt hit wa, In theory high would always hit something in this case it's seems its getting a floor normal for some reason
+		if debug:
+			$debug.text += "-High cast not touching anything  returning\n"
 		return velo
 	
 	#EGLO.drawSphere($"/root",Vector3(highCast.global_position.x,destY,highCast.global_position.z),Color.RED)
@@ -404,11 +394,16 @@ func hitWall(normalDeg,delta : float,point : Vector3,isOnGround,velo : Vector3,o
 		
 
 		if (global_position.y + maxStepAmt) > lowestCeil:
+			if debug:
+				%debug.text += "-Position + maxStempAmt > lowestCeil, abandon\n"
 			return velo
 		
 		var distFromFloorToCeil = lowestCeil-0.01 - global_position.y
 		
 		if distFromFloorToCeil < height:#not enough space to fit the character
+			if debug:
+				%debug.text += "-Floor to ceiling distance less than character height, abandon\n"
+				
 			return velo
 		
 		
@@ -450,6 +445,8 @@ func hitWall(normalDeg,delta : float,point : Vector3,isOnGround,velo : Vector3,o
 	
 	if(par.test_move(global_transform,velo.normalized()*0.01)):#we have made a mistake and cannot move forward after jump - undo
 		get_parent().position.y = preJumpY
+		if debug:
+			$debug.text += "Step up attempted but failed\n"
 		return velo
 		
 	var col = par.move_and_collide(velo*delta)
@@ -588,7 +585,7 @@ func XZ(vector : Vector3) -> Vector2:
 
 var line = null
 func moveXZ(velocity : Vector3, delta : float) -> Array[Node3D]:
-
+	var initialVelo = velocity
 	onGround = false
 	var objectsHit : Array[Node3D] = []
 	
@@ -601,12 +598,16 @@ func moveXZ(velocity : Vector3, delta : float) -> Array[Node3D]:
 	#var preInitialWallHitVelo = velocity
 
 
-	if initialCollision != null and canStepUp:#if we hit someting and stepping up is allowed
-		var t = remainingVelo
-		remainingVelo = checkCollidersForStep(velocity,remainingVelo,delta,initialCollision,objectsHit,2)
-		
-	else:
-		remainingVelo = Vector3.ZERO# we hit nothing so all velo was spent
+	#if initialCollision != null and canStepUp:#if we hit someting and stepping up is allowed
+		#var t = remainingVelo
+		#remainingVelo = checkCollidersForStep(velocity,remainingVelo,delta,initialCollision,objectsHit,2)
+		#var t2 = remainingVelo
+		#
+	#else:
+		#remainingVelo = Vector3.ZERO# we hit nothing so all velo was spent
+		#if debug:
+			#%debug.text += "No XY collision\n"
+		#
 			
 	
 	
@@ -616,8 +617,8 @@ func moveXZ(velocity : Vector3, delta : float) -> Array[Node3D]:
 	
 	#var posDiff = initialXY-Vector3(get_parent().position.x,0,get_parent().position.z)
 	
-	if remainingVelo.length() > 0.001:
-		par.move_and_collide(remainingVelo*delta)
+	#if remainingVelo.length() > 0.001:
+	#	par.move_and_collide(remainingVelo*delta)
 	
 	
 	
@@ -640,25 +641,96 @@ func moveXZ(velocity : Vector3, delta : float) -> Array[Node3D]:
 	return objectsHit
 	
 
+func moveY(delta : float,velocity : Vector3,pOnGround : bool,headBonk : bool):
+	velocity.y -= gravity*delta
+		
+	if par.pOnGround == true :#initial tick of leaving the ground doubles gravity
+		velocity.y -= gravity*delta
+			
+			
+	var col : KinematicCollision3D= par.move_and_collide(Vector3(0,velocity.y*delta,0))#APPLY GRAVITY
+		
+	
+		
+	#if pOnGround and velocity.y <= 0:#this is snapping down small amounts such a when going down stairs
+		#footCast.enabled = true
+		#footCast.force_shapecast_update()
+			#
+		#var collisionCount = footCast.get_collision_count()
+			#
+		#for i in footCast.get_collision_count():
+				#
+			#var amt = stepAmt#stepRatio*par.height
+			#var h = global_position.y - footCast.get_collision_point(i).y
+				#
+			#if !touching.has(footCast.get_collider(i)):
+				#touching.append(footCast.get_collider(i))
+				#touchingPos.append(footCast.get_collider(i).global_position)
+				#
+			#if h <= snapDownAmt:
+				#var c =  par.move_and_collide(Vector3(0,-snapDownAmt,0))
+				#interplateThisFrame = true
+				#if c!= null:
+					#col = c
+				
+	if col != null:
+			
+		if (global_position.y-col.get_position(0).y+mostRecentFloor.y) > 0.0:#point needs to be below us
+			var angle =  col.get_normal(0)
+			if !touching.has(col.get_collider()):
+				touching.append(col.get_collider())
+				touchingPos.append(col.get_collider().global_position)
+				
+			if isNormalStandable(angle):
+				var point = col.get_position(0)
+				mostRecentFloor =Vector3(point.x, get_parent().position.y+ colShapeOffset.y,point.z) - get_parent().position  + colShapeOffset
+			else:
+				EGLO.drawSphere($/root,mostRecentFloor+global_position)#make sure this is on the floor
+				var a = velocity.slide(angle)
+				var test = par.velocity
+				print(a,",",test)
+				var colDown : KinematicCollision3D = par.move_and_collide(a*Vector3(delta,delta,delta))
+				velocity = a
+				if colDown != null:
+					var colCount = colDown.get_collision_count()
+					var collider = colDown.get_collider(0)
+					var normal = colDown.get_normal(0)
+					if isNormalStandable(normal):
+						onGround = true
+					var t = 2
+					#par.move_and_slide()
+					
+		else:
+			headBonk = true
+	else:#if we have no collision after moving on the y axis
+		onGround = false
+		
+	return velocity
+
 func moveCollide(velo : Vector3,delta) -> KinematicCollision3D:
 	
 	if velo.length() < 0.001:
 		return null
 
-	var col : KinematicCollision3D = par.move_and_collide(velo*delta)
+	var col : KinematicCollision3D = par.move_and_collide(velo*delta,false,0.001,false,3)
 
 	
 	
-	
 	if col == null:
+		
 		return null
 	
-	for i in col.get_collision_count():
+	var collisionCount : int =  col.get_collision_count()
+	
+	#if collisionCount >1:
+	#	breakpoint
+	
+	for i in collisionCount:
 		if !touching.has(col.get_collider(i)):
 				touching.append(col.get_collider(i))
 				touchingPos.append(col.get_collider(i).global_position)
 					
-	for i in col.get_collision_count():
+	for i in collisionCount:
 		var angle = normalToDegree(col.get_normal(i))
 		
 		
@@ -702,12 +774,12 @@ func isOnGround(objectsHit : Array[Node3D]):
 			#if position is higher than ground diff will be negative
 			#if position is lower than ground diff will be positive
 			var diff = (point.y-global_position.y)-colShapeOffset.y
-			print(diff)
+			#print(diff)
 
 			if diff > 0.1:
 				par.position.y += max(0,diff)#clip out of floor if someting like a lift pushes into us
-			print(par.position.y)
-			print("-----")
+			#print(par.position.y)
+			#print("-----")
 			mostRecentFloor =Vector3(point.x, get_parent().position.y,point.z) - get_parent().position  + colShapeOffset
 			
 			return
@@ -896,7 +968,6 @@ func isFlat(points : PackedVector3Array):
 	return true 
 
 
-var debug = []
 func checkColShapeOverlap(col):
 	
 	
@@ -962,7 +1033,8 @@ func checkHighCast():
 			if highCast.get_collision_point(i).y < lowestCeil:
 				lowestCeil = highCast.get_collision_point(i).y
 			
-		if angle < 90.001:#floor
+		#if angle < 90.001:#floor
+		if angle <= slopeAngle:
 			if  highCast.get_collision_point(i).y > destY:
 				destY = highCast.get_collision_point(i).y
 				
@@ -971,33 +1043,47 @@ func checkHighCast():
 var nodes = []
 
 func checkCollidersForStep(velocity : Vector3, remainingVelo : Vector3,delta : float,collision : KinematicCollision3D,objectsHit : Array,breakThisTime = 1):
-	for i in range(0,collision.get_collision_count()):
+	var initVelo = velocity
+	var collisionCount : int = collision.get_collision_count()
+	
+	for i in range(0,collisionCount):
 		var normalDeg = normalToDegree(collision.get_normal(i))
 
 		
-		if normalDeg > 89:# we have hit a wall
+		
+		if normalDeg > slopeAngle:# we have hit a wall
 			
-			remainingVelo = adjustVeloToRemainder(velocity,collision.get_remainder(),collision.get_normal(i),false)#we don't slide this time in particular as we might still be able to spend the remaining velo correctly if we jump over wall
+			%debug.text += "Collider %s normal: %s is wall/slope\n" % [i,snappedf(normalDeg,0.01)]
+			
+			#we don't slide this time in particular as we might still be able to spend the remaining velo correctly if we jumped over wall
+			#remainingVelo = adjustVeloToRemainder(velocity,collision.get_remainder(),collision.get_normal(i),false)
+			remainingVelo = adjustVeloToRemainder(velocity,collision.get_remainder(),collision.get_normal(i),true)
 			var t = remainingVelo
 			remainingVelo = hitWall(normalDeg,delta,collision.get_position(i),get_parent().onGround,remainingVelo,objectsHit)
 			
-			if remainingVelo == t and breakThisTime > 0:
+			if remainingVelo == t and breakThisTime > 0:#we still have velo to spend
+				
 				#var newVelo = remainingVelo.slide(collision.get_normal(i))
 				var newVelo = adjustVeloToRemainder(remainingVelo,collision.get_remainder(),collision.get_normal(i),true)
-
+				#newVelo.y = 0
 				if newVelo.length() > 0.01:
 					
 					var firstPos = get_parent().position
 					var collision2 : KinematicCollision3D = moveCollide(newVelo,delta)
 					
-					
+					#collision2 = null
 					if collision2 != null:
-						
 						var pRemainingVelo = remainingVelo
-						remainingVelo = checkCollidersForStep(newVelo,remainingVelo,delta,collision2,objectsHit,breakThisTime-1)#If you are hugging a wall and try to step up laterally this will let you
+						
+						remainingVelo = checkCollidersForStep(newVelo,remainingVelo,delta,collision2,objectsHit,breakThisTime-1)#If you are face hugging a wall and try to step up left/right to this will let you
+						
 						if (firstPos-get_parent().position).y == 0:
-							#get_parent().position = firstPos
-							return adjustVeloToRemainder(pRemainingVelo,collision.get_remainder(),collision.get_normal(i))
+							#leting the y be projected here will cause climbing up walls
+							#return remainingVelo
+							var r =  adjustVeloToRemainder(pRemainingVelo,collision.get_remainder(),collision.get_normal(i))
+							#r.y = 0
+							return r
+						#	return adjustVeloToRemainder(pRemainingVelo,collision.get_remainder(),collision.get_normal(i))
 							
 							
 						
@@ -1005,7 +1091,19 @@ func checkCollidersForStep(velocity : Vector3, remainingVelo : Vector3,delta : f
 					else:
 						return Vector3.ZERO# we hit nothing so all velo was spent
 				 
-				
-		remainingVelo = adjustVeloToRemainder(velocity,collision.get_remainder(),collision.get_normal(i))#TThis pushes us up slopes
-	
+		
+		elif debug:
+			%debug.text += "Collider %s normal: %s dont call hitWall...\n" % [i,snappedf(normalDeg,0.01)]
+		
+		#This pushes us up slopes
+		#Velo is projected to slope normal
+		if normalDeg  <= slopeAngle:
+			remainingVelo = adjustVeloToRemainder(velocity,collision.get_remainder(),collision.get_normal(i))
+		#
+		#if remainingVelo.length() > 0.001 and breakThisTime > 0:#we still have velo to spend
+			#var newVelo = adjustVeloToRemainder(remainingVelo,collision.get_remainder(),collision.get_normal(i),true)
+			#var collision2 : KinematicCollision3D = moveCollide(newVelo,delta)
+			#if collision2 != null:
+				#remainingVelo = checkCollidersForStep(newVelo,remainingVelo,delta,collision2,objectsHit,breakThisTime-1)
+			#
 	return remainingVelo

@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://qp4tpsna5r7"]
+
+[ext_resource type="PackedScene" uid="uid://b655qderm0gs0" path="res://addons/gameAssetImporter/scenes/painter/painter.tscn" id="1_1hcf6"]
+[ext_resource type="Script" uid="uid://b64itmlvvp2t1" path="res://addons/gameAssetImporter/scenes/painter/painter_window.gd" id="1_3idw3"]
+
+[node name="PainterWindow" type="Window"]
+oversampling_override = 1.0
+size = Vector2i(990, 435)
+popup_window = true
+script = ExtResource("1_3idw3")
+
+[node name="Painter" parent="." instance=ExtResource("1_1hcf6")]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]

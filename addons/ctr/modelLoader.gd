@@ -55,27 +55,27 @@ func loadSharedVRMInISO():
 		iso.ISOfile.seek((textureOffset * 2048) +  parent.bigfileRootOffset )
 		var data = iso.ISOfile.get_buffer(textureSize)
 				
-		return imageLoader.getVRMdata(data)
+		return imageLoader.getVRMdata(data,"bigfile/packs/shared.vrm")
 		
 	else:
 		return parent.cachedSharedVrmData
 
-func threadedWait(thread : Thread,modelName : String,specificAnims : Array,resultStorage : Array,textureData):
+func threadedWait(thread : Thread,modelName : String,params : Dictionary,resultStorage : Array,textureData):
 	var t = Time.get_ticks_msec()
-	resultStorage.append(createModel(modelName,textureData,specificAnims))
+	resultStorage.append(createModel(modelName,textureData,params))
 	print("model load time: ",Time.get_ticks_msec()-t)
 
-func createModelThreaded(modelName : String,specificAnims : Array,resultStorage,texureData = null) -> Thread:
+func createModelThreaded(modelName : String,params : Dictionary,resultStorage,texureData = null) -> Thread:
 	var t : Thread = Thread.new()
-	t.start(threadedWait.bind(t,modelName,specificAnims,resultStorage,texureData))
+	t.start(threadedWait.bind(t,modelName,params,resultStorage,texureData))
 	return t
 
-func createModel(modelName : String,textureData = null,specifcAnimation := []):
+func createModel(modelName : String,textureData = null,params := {}):
 	
 	
 	
 	if textureData == null:
-		if iso.ISOfile != null:
+		if iso.ISOfile.file != null:
 			textureData = loadSharedVRMInISO()
 		
 		elif parent.standaloneBigfile != null:
@@ -111,12 +111,11 @@ func createModel(modelName : String,textureData = null,specifcAnimation := []):
 		parent.standaloneBigfile.seek((modelOffset * 2048))
 		data = parent.standaloneBigfile.get_buffer(modelSize)
 	
-	var model =  parseCTR(data,textureData,0,specifcAnimation)
+	var model =  parseCTR(data,textureData,0,params)
 	
+	if params.has("debug"):
+		model.set_meta("path",modelName)
 	
-	#addWheels(model)
-	
-	#ENTG.saveNodeAsScene(model)
 	return model
 	
 
@@ -198,54 +197,6 @@ func addWheels(model : Node3D):
 	model.add_child(wheelParent)
 
 
-func test2(textureLayout,paletteCache):
-	
-
-	var pageCoord : Vector2i = textureLayout["page"]
-	var topLeft = textureLayout["tlUV"]
-	var dim = textureLayout["dim"]
-	var xStartPixel = (pageCoord.x * 128) + (topLeft.x/2)#uv 255 is page pixel width which is 128
-	var yStartPixel = (pageCoord.y * 256) + topLeft.y
-	var palPos = textureLayout["pallete"]
-	
-	var bpp = textureLayout["bpp"]
-	var texture  = []
-	texture.resize(dim.x*dim.y*2)
-	
-	var sourceStartOffset =  ((yStartPixel*2048)+xStartPixel)/2#1 byte per pixel>
-	var vram = imageLoader.vram
-	
-	
-	for y in dim.y:
-		for x in dim.x:
-			var word_index = sourceStartOffset + (y * 1024) + x
-			var byte_index = (y * dim.x + x) * 2
-
-			var low = vram[word_index * 2]
-			var high = vram[word_index * 2 + 1]
-
-			texture[byte_index] = low
-			texture[byte_index + 1] = high
-
-	
-	var palStartOffset = palPos.y*2048 + palPos.x*32
-	#var paletteBytes = createPalleteFromOffset(palStartOffset)
-	var palKey = str(textureLayout["pallete"])+str(textureLayout["page"])
-	var palatteColors = paletteCache[palKey]
-	
-	
-	var image = Image.create_empty(dim.x*4,dim.y,false,Image.FORMAT_RGBA8)
-	var pixels = []
-
-
-	for y in dim.y:
-		for x in dim.x * 2:  # each byte has 2 pixels
-			var byte = texture[(y*dim.x*2)+x]
-			image.set_pixel(x*2,y,palatteColors[byte & 0b00001111])
-			image.set_pixel((x*2) + 1,y,palatteColors[byte >> 4])
-	
-	
-	return image
 
 func createPalleteFromOffset(palStartOffset):
 	var vram = imageLoader.vram
@@ -395,7 +346,8 @@ func loadModelFromFile(filepath : String):
 	var model =  parseCTR(fileData)
 	return model
 
-func parseCTR(d : PackedByteArray,textureData:Array[Dictionary] = [],customStartOffset := 0,specificAnimation := []):
+func parseCTR(d : PackedByteArray,textureData:Array[Dictionary] = [],customStartOffset := 0,params := {}):
+	var specificAnimation = []
 	var data := StreamPeerBuffer.new()
 	data.put_data(d)
 	data.seek(customStartOffset)
@@ -409,12 +361,16 @@ func parseCTR(d : PackedByteArray,textureData:Array[Dictionary] = [],customStart
 	var subModelArr : Array[SubModel]
 	var colors : PackedColorArray= []
 	var root := Node3D.new()
-	
+	var debug := false
 	var cachedTextures = {}
 	var paletteCache : Dictionary[String,Array] = {}
 	
 	
+	if params.has("debug"):
+		debug = true
 	
+	if params.has("specificAnims"):
+		specificAnimation = params["specificAnims"]
 	#if modelName != "banner":
 	#	return
 	
@@ -479,13 +435,19 @@ func parseCTR(d : PackedByteArray,textureData:Array[Dictionary] = [],customStart
 		for t in maxTextureIndex:##44 and 45 are eyes
 			data.seek(textureOffsets[t]+4)
 			textureLayouts[t] = imageLoader.parseTextureLayout(data)
+			if debug:
+				textureLayouts[t]["offset"] = textureOffsets[t]+4
 		
 		
-		
+		if debug:
+			root.set_meta("textureLayouts",textureLayouts)
 		
 		for textureLayout in textureLayouts:
-			textureLayout["uv"][3] = textureLayout["uv"][2];
-			textureLayout["normUV"] = normalizeUV(textureLayout["uv"])
+			#textureLayout["uv"][3] = textureLayout["uv"][2];
+			var inUV = textureLayout["uv"].duplicate()
+			inUV[3] = inUV[2]#?
+			textureLayout["normUV"] = normalizeUV(inUV)
+			
 			
 			if !textureLayoutsByPalette.has(textureLayout["pallete"]):
 				textureLayoutsByPalette[textureLayout["pallete"]] = []
@@ -493,9 +455,10 @@ func parseCTR(d : PackedByteArray,textureData:Array[Dictionary] = [],customStart
 			textureLayoutsByPalette[textureLayout["pallete"]].append(textureLayout)
 			
 		
+			
 		
 		
-		
+			
 		
 		
 		#----- create palette cache
@@ -513,18 +476,21 @@ func parseCTR(d : PackedByteArray,textureData:Array[Dictionary] = [],customStart
 					paletteCache[palKey] = paletteColors
 		
 		
-	
-	
+		
 		if !textureData.is_empty():
-			
 			for t in textureLayouts:
-				var key = str(t["pallete"]) + str(t["page"]) + str(t["dim"]) + str(t["tlUV"])
-				if !cachedTextures.has(key):
-					var image = test2(t,paletteCache)
-					
-					cachedTextures[key] =image
-				
-				t["image"] = cachedTextures[key] 
+					t["image"] = imageLoader.textureLayoutToImage(t,paletteCache,cachedTextures)
+		
+		#if !textureData.is_empty():
+			#
+			#for t in textureLayouts:
+				#var key = str(t["pallete"]) + str(t["page"]) + str(t["dim"]) + str(t["tlUV"])
+				#if !cachedTextures.has(key):
+					#var image = test2(t,paletteCache)
+					#
+					#cachedTextures[key] =image
+				#
+				#t["image"] = cachedTextures[key] 
 				
 		
 		
@@ -605,11 +571,20 @@ func parseCTR(d : PackedByteArray,textureData:Array[Dictionary] = [],customStart
 				for sIdx in surfaceInfo.size():
 					var mat = StandardMaterial3D.new()
 					mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-					#  mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+					mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
 					mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+					
+					
+					
 					var image = surfaceInfo[sIdx]
-					#if image != null:
-					#image.save_png("res://dbg/"+str(sIdx)+".png")
+					
+					for tl in textureLayouts:
+						if tl["image"] == image:
+							var mode = tl["blendingMode"]
+							#if mode != 3:
+							#	breakpoint
+					
+					
 					
 					
 					if image != null:
@@ -644,6 +619,9 @@ func parseCTR(d : PackedByteArray,textureData:Array[Dictionary] = [],customStart
 		if root.get_node_or_null("turn/frame 10"):
 			root.get_node("turn/frame 0").visible = false
 			root.get_node("turn/frame 10").visible =true
+	
+	
+	
 	
 	
 	addWheels(root)
@@ -731,7 +709,8 @@ func createFrameMesh(drawList,frameVerts,frameVertOffsets,scale,colors,textureLa
 	for i in triVerts.size()/3:
 		triVerts3[i] = ([triVerts[(i*3)] , triVerts[(i*3)+1], triVerts[(i*3)+2]] as PackedVector3Array)
 		triUVs3[i] = ([triUVs[(i*3)] , triUVs[(i*3)+1], triUVs[(i*3)+2]])
-		vertColors3.append([vertColors[(i*3)] , vertColors[(i*3)+1] , vertColors[(i*3)+2]])
+		#vertColors3.append([vertColors[(i*3)] , vertColors[(i*3)+1] , vertColors[(i*3)+2]])
+		vertColors3.append([vertColors[(i*3)+2] , vertColors[(i*3)+1] , vertColors[(i*3)+0]])
 		triTextures3.append(triTextures[i*3])
 		
 	

@@ -15,13 +15,13 @@ var fileNames : PackedStringArray = []
 var entriesOffsets : PackedInt32Array = []
 var entriesSizes : PackedInt32Array = []
 var bigfileRootOffset: int = 0
+var bigfileCount : int = 0
 var textureFiles : Dictionary [String,Array]
 var modelFiles : Dictionary [String,Array]
 var levelFiles : Dictionary [String,Array]
 var textureLayoutsDict : Dictionary = {}
 var toDisk : bool= false
 var standaloneBigfile : FileAccess = null
-var file : FileAccess
 
 var scaleFactor : Vector3 = Vector3.ZERO
 var gameName : String
@@ -29,16 +29,17 @@ var gameName : String
 var cachedSharedVrmData = null
 var params
 var config
+
 @onready var resourceTypeToCreateFunction : Dictionary = {
 	"vrm" : imageLoader.createVRM
 }
-
 
 var version = VERSION.USA
 
 enum VERSION {
 	USA,
-	PAL
+	PAL,
+	BETA14
 }
 
 var levelInternalNameToExternal = {
@@ -94,23 +95,27 @@ func getReqs(configName):
 func initialize(args,config,gameName):
 
 	self.gameName = gameName
-	print_tree_pretty()
+	
 	var ret : Array = iso.initialize(args[0])
+	
+	
+	if ret.is_empty():
+		return -1
 	
 	var allFiles = ret[0].keys()
 	
-	if allFiles.find("SCES_021.05") != -1:
-		version = VERSION.PAL
-	
-	file = iso.ISOfile.file
-	self.iso = iso
+
+	parseBigFile(iso.ISOfile,allFiles)
 	
 	
-	parseBigFile(file)
-	
-	
+		
+	if version == VERSION.BETA14:
+		return
 	
 	var t = fileNames.find("bigfile/packs/shared.mpk")
+	
+	
+	
 	iso.ISOfile.seek((entriesOffsets[t] * 2048) + bigfileRootOffset )
 	var data := iso.ISOfile.get_buffer(entriesSizes[t])
 	parseMpk(data)
@@ -213,7 +218,7 @@ func createModelThreaded(modelName : String,specificAnims,resultStorage):
 
 
 func createModel(modelName : String,params = {}):
-	return resourceManager.fetchModel(modelName)
+	return resourceManager.fetchModel(modelName,params)
 
 
 func getAllCategories():
@@ -271,17 +276,26 @@ func getResourceManager() -> Node:
 func getEntityCreator() -> Node:
 	return entityCreator
 
-func loadModelFromFile(filepath : String):
-	return resourceManager.loadModelFromFile(filepath)
+func loadModelFromFile(filepath : String,params : Dictionary = {}):
+	return resourceManager.loadModelFromFile(filepath,params)
 
 
 
 
-func loadFileNames():
+func loadFileNames(allFiles):
+	
+	if allFiles.find("SCES_021.05") != -1:
+		version = VERSION.PAL
+	elif bigfileCount == 609:
+		version = VERSION.BETA14
+	
 	var filePath = "res://addons/ctr/bigfileUSA.txt"
 	
 	if version == VERSION.PAL:
 		filePath ="res://addons/ctr/bigfileEU.txt"
+	
+	if version == VERSION.BETA14:
+		filePath = "res://addons/ctr/bigfileBeta14.txt"
 	
 	var file := FileAccess.open(filePath, FileAccess.READ)
 
@@ -313,21 +327,29 @@ func loadFileNames():
 		
 		
 
-func parseBigFile(file: FileAccess):
+func parseBigFile(file: ISOFileWrapper,allFiles):
 	var t = Time.get_ticks_msec()
 	
-	var fliePath := file.get_path()
+	var filePath 
 	
-	if fliePath.to_lower().find("bigfile") == -1:
+	if file.binMode == file.BIN_MODE.BUFFER:
+		filePath = file.binFilePath
+	else:
+		filePath = file.file.get_path()
+	
+	if filePath.to_lower().find("bigfile") == -1:
 		var size = iso.seekToFileAndReturnSize("BIGFILE.BIG")
 		bigfileRootOffset = iso.ISOfile.get_position()
-	else:
-		standaloneBigfile = file
+	#else:
+	#	standaloneBigfile = file
 		
 	var magic = file.get_32()
 	var numFiles = file.get_32()
 	
 	
+	
+	
+	bigfileCount = numFiles
 	entriesOffsets.resize(numFiles)
 	entriesSizes.resize(numFiles)
 	
@@ -335,5 +357,5 @@ func parseBigFile(file: FileAccess):
 		entriesOffsets[i]= file.get_32()
 		entriesSizes[i] = file.get_32()
 		
-	loadFileNames()
+	loadFileNames(allFiles)
 	

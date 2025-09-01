@@ -1,0 +1,40 @@
+[gd_scene load_steps=3 format=3 uid="uid://k8pb5cw0njnn"]
+
+[ext_resource type="Script" uid="uid://crloh7sontjf5" path="res://addons/gameAssetImporter/scenes/arrow/gizmo.gd" id="1_2s1ii"]
+[ext_resource type="PackedScene" uid="uid://csa11pvim5jd7" path="res://addons/gameAssetImporter/scenes/arrow/arrow.tscn" id="1_3sh7s"]
+
+[node name="Gizmo" type="Node3D"]
+script = ExtResource("1_2s1ii")
+arrowLength = 2.6199999999953434
+headThickness = 0.16800000000512227
+headLength = 0.588000000003376
+
+[node name="X" parent="." instance=ExtResource("1_3sh7s")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 0, 0, -0.0013849735)
+length = 2.6199999999953434
+headLength = 0.588000000003376
+headThickness = 0.16800000000512227
+baseThickness = 0.10000000000582077
+disableMessage = true
+color = Color(1, 0, 0, 1)
+id = "X"
+
+[node name="Z" parent="." instance=ExtResource("1_3sh7s")]
+transform = Transform3D(4.371139e-08, 0.99999994, -8.742277e-08, 1, -4.3711385e-08, 0, -3.821371e-15, -8.742277e-08, -0.99999994, 0, 0, 0)
+length = 2.6199999999953434
+headLength = 0.588000000003376
+headThickness = 0.16800000000512227
+baseThickness = 0.10000000000582077
+disableMessage = true
+color = Color(0.2245, 0.00999999, 1, 1)
+id = "Z"
+
+[node name="Y" parent="." instance=ExtResource("1_3sh7s")]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0)
+length = 2.6199999999953434
+headLength = 0.588000000003376
+headThickness = 0.16800000000512227
+baseThickness = 0.10000000000582077
+disableMessage = true
+color = Color(0.10787641, 0.9459776, 0, 1)
+id = "Y"

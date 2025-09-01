@@ -46,8 +46,9 @@ func _input(event):
 	if subViewport == null:
 		return
 	
-	if subViewport.get_node("CameraTopDown").visible:
-		subViewport.get_node("CameraTopDown")._input(event)
+	if get_node_or_null("CameraTopDown") != null:
+		if subViewport.get_node("CameraTopDown").visible:
+			subViewport.get_node("CameraTopDown")._input(event)
 	
 	
 	if subViewport.get_node("Camera3D").visible:
@@ -60,8 +61,22 @@ func _on_menu_button_open_pressed() -> void:
 
 
 func _on_sub_viewport_container_mouse_entered() -> void:
-	%SubViewport.process_mode =Node.PROCESS_MODE_INHERIT
+	#%SubViewport.process_mode =Node.PROCESS_MODE_INHERIT
+	%Camera3D.processInput = true
 
 
 func _on_sub_viewport_container_mouse_exited() -> void:
-	%SubViewport.process_mode =Node.PROCESS_MODE_DISABLED
+#	%SubViewport.process_mode =Node.PROCESS_MODE_DISABLED
+	#if !Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	%Camera3D.processInput = false
+
+
+func _on_menu_button_save_pressed() -> void:
+	
+	if $Node.curModel == null:
+		return
+	
+	var option := EGLO.showOption(self,"Save changes to file?","Yes","No")
+	option.confirmed.connect($Node.patchModel)
+	

@@ -60,6 +60,10 @@ many = false
 custom_minimum_size = Vector2(250, 0)
 text = "desktop"
 
+[node name="Button4" type="Button" parent="VBoxContainer3/VBoxContainer/HBoxContainer/path2/h" index="7"]
+layout_mode = 2
+text = "Open "
+
 [node name="FileDialog" parent="VBoxContainer3/VBoxContainer/HBoxContainer/path2" index="2"]
 title = "Open a Directory"
 file_mode = 2
@@ -91,6 +95,7 @@ button_pressed = true
 custom_minimum_size = Vector2(0, 43.33)
 layout_mode = 2
 
+[connection signal="pressed" from="VBoxContainer3/VBoxContainer/HBoxContainer/path2/h/Button4" to="VBoxContainer3/VBoxContainer" method="_on_button_4_pressed"]
 [connection signal="pressed" from="VBoxContainer3/VBoxContainer/CopyButton" to="VBoxContainer3/VBoxContainer" method="_on_copy_button_pressed"]
 
 [editable path="VBoxContainer3/VBoxContainer/HBoxContainer/path"]

@@ -266,7 +266,7 @@ static func printMapNames(tree:SceneTree,game : String,blank : bool = false):
 
 	return runningStr
 
-static func createModel(modelName : StringName,game : String,specificAnimations : Array = []):
+static func createModel(modelName : StringName,game : String,params : Array = []):
 	
 	var isEditor : bool= Engine.is_editor_hint()
 

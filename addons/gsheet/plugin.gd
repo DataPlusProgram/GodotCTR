@@ -2,8 +2,7 @@
 extends EditorPlugin
 signal dictChangedSignal
 
-var interface =  null#load("res://addons/gSheet/scenes/spreadsheet/full/spreadsheetFull.tscn").instantiate()
-
+var interface =  null
 var curObj = null
 var objectLastSaved = null
 var importPlugin

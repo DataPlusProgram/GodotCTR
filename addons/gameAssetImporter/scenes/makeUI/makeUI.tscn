@@ -70,6 +70,9 @@ zoomMax = 500.0
 visible = false
 texture = SubResource("ImageTexture_nqw1v")
 
+[node name="soundFontPath" parent="h/v3/preview/MarginContainer" index="3"]
+text = "res://addons/godotWad/soundfonts/gzdoom.sf2"
+
 [node name="pathTxt" parent="h/v3/preview/MarginContainer/soundFontPath/h" index="1"]
 text = "res://addons/godotWad/soundfonts/gzdoom.sf2"
 

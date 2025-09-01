@@ -30,8 +30,9 @@ func getBinData(path:StringName):
 	
 	if error !=0:
 		breakpoint
+	var a = Time.get_ticks_msec()
 	readAllSectors(file,sectorDataArray,sectorInfoArray,sectorPostArray, sectorSubheaderArray )
-	
+	print("bin read time:",Time.get_ticks_msec()-a)
 	
 
 func initialize(path : StringName):
@@ -470,4 +471,4 @@ func createDirDict(file : FileAccess,arr : Array[PathTableEntry]):
 			dict[pathStr] = i
 	
 	return dict
-	print("%x" % allPTE[0].offset)
+	

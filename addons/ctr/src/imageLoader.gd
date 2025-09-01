@@ -10,7 +10,7 @@ extends Node
 @onready var textureLayoutsDict = parent.textureLayoutsDict
 #func createVRM(file: FileAccess,index : int):
 
-
+var vrmRects : Dictionary[Rect2i,String] = {}
 var dummyClut := [
 	Color(1.0, 0.0, 0.0, 0.0),      # red
 	Color(0, 1, 0),      # green
@@ -55,12 +55,12 @@ func createVRM(textureName : String):
 	var textureSize = textureInfo[0]
 	var textureOffset = textureInfo[1]
 	
-	iso.ISOfile.seek((textureOffset * 2048) + rootOffset )
+	parent.iso.ISOfile.seek((textureOffset * 2048) + rootOffset )
 	
 	
 	var t = Time.get_ticks_msec()
 	
-	var data = iso.ISOfile.get_buffer(textureSize)
+	var data = parent.iso.ISOfile.get_buffer(textureSize)
 	var img = parseVRM2(data)
 	
 	#img.save_png("res://test.png")
@@ -68,13 +68,16 @@ func createVRM(textureName : String):
 	return  img
 
 
-func getVRMdata(data : PackedByteArray) -> Array[Dictionary]:
+func getVRMdata(data : PackedByteArray, vrmFilePath = "") -> Array[Dictionary]:
+	
+	#if vrmFilePath == "":
+	#	breakpoint
 	
 	var rootOffset = parent.bigfileRootOffset
 	
 	
 	
-	var data2 = StreamPeerBuffer.new()
+	var data2 := StreamPeerBuffer.new()
 	
 	data2.put_data(data)
 	data2.seek(0)
@@ -83,12 +86,12 @@ func getVRMdata(data : PackedByteArray) -> Array[Dictionary]:
 	var timData : Array[Dictionary]= []
 	
 	if magic == 0x20:
-		for i in range(2):
-			
+		for i in 2:
+			var pos = data2.get_position()
 			var size := data2.get_32()
 			var tim_data = data2.get_data(size)[1]
 			
-			timData.append( getTimData(tim_data))
+			timData.append( getTimData(tim_data,vrmFilePath))
 	else:
 		data2.seek(0)
 		timData.append(getTimData(data))
@@ -196,7 +199,7 @@ func getTimPixels(tim : PackedByteArray,dim : Vector2i,bpp : int,clut : PackedCo
 	return pixelData
 
 
-func getTimData(dat : PackedByteArray,loadIntoVRAM : bool= false) -> Dictionary:
+func getTimData(dat : PackedByteArray,vrmFilePath = "") -> Dictionary:
 	var data = StreamPeerBuffer.new()
 	data.put_data(dat)
 	data.seek(0)
@@ -238,21 +241,27 @@ func getTimData(dat : PackedByteArray,loadIntoVRAM : bool= false) -> Dictionary:
 		image_data[i] = data.get_8() 
 		
 	
-	copyImageToVram16(image_data,Vector2i(vramX,vramY),Vector2i(w,h))
-	#for y in h:
-	#	for x in w:
-	#		var byte = dat[(y*w)+x]
-	#		vram[((1024*y) + vramY) + vramX+x] = dat[(y*w)+x]
+	copyImageToVram16(image_data,Vector2i(vramX,vramY),Vector2i(w,h),vrmFilePath)
+
 	
 	return {"clut":clut,"imageData":image_data,"dim":Vector2i(w,h),"bpp":bpp,"vramPos":Vector2i(vramX,vramY)}
 
-func copyImageToVram16(dat: PackedByteArray,vramPos : Vector2, dim : Vector2):
+func copyImageToVram16(dat: PackedByteArray,vramPos : Vector2, dim : Vector2,vrmFilePath):
 	var vramWidth = 1024
 	var imgWidth = int(dim.x)
 	var imgHeight = int(dim.y)
 	var offsetX = int(vramPos.x)
 	var offsetY = int(vramPos.y)
-
+	
+	if vrmFilePath == " ":
+		breakpoint
+	
+	if !vrmFilePath.is_empty():
+		var rect = Rect2i(offsetX,offsetY,imgWidth,imgHeight)
+	
+		if !vrmRects.has(rect):
+			vrmRects[rect] = vrmFilePath
+	
 	for y in range(imgHeight):
 		for x in range(imgWidth):
 			var srcIndex = ((y * imgWidth) + x) * 2
@@ -266,6 +275,13 @@ func copyImageToVram16(dat: PackedByteArray,vramPos : Vector2, dim : Vector2):
 			var dstIndex = ((dstY * vramWidth) + dstX) * 2
 			vram[dstIndex] = dat[srcIndex]
 			vram[dstIndex + 1] = dat[srcIndex + 1]
+			
+			
+		
+
+
+func getVrmPathFromPoint(point : Vector2i):
+	breakpoint
 
 func timDataToImage( timData : Dictionary , externalClut : PackedColorArray = []):
 	var data  : PackedByteArray= timData["imageData"]
@@ -311,7 +327,7 @@ func geVRamImage() -> Image:
 	
 	
 	drawPageGridOnImage(image)
-	image.save_png("res://vram.png")
+	image.save_png("res://dbg/vram.png")
 	return image
 	
 	
@@ -537,13 +553,25 @@ func readPalleteFromTextureLayout(textureLayout:Dictionary):
 	var palStartOffset = textureLayout["pallete"].y*2048 + textureLayout["pallete"].x*32
 	var paletteBytes = createPalleteFromOffset(palStartOffset,textureLayout["bpp"])
 	var paletteColors = []
+	
 	paletteColors.resize(paletteBytes.size())
 	
 	for p in paletteBytes.size():
 		paletteColors[p] = convert_5551_to_rgb(paletteBytes[p])
 		
 	return paletteColors
+
+func colorArrayToPaletteBytes(colors : PackedColorArray) -> PackedByteArray:
 	
+	var bytes :PackedByteArray = []
+	
+	for color in colors:
+		bytes.append(convert_rgb_to_5551(color))
+		
+	return bytes
+		
+		
+
 func textureLayoutToImage(textureLayout : Dictionary,paletteCache := {},textureCache := {}):
 
 	var palKey := str(textureLayout["pallete"])+str(textureLayout["page"])
@@ -562,6 +590,156 @@ func textureLayoutToImage(textureLayout : Dictionary,paletteCache := {},textureC
 		
 	return textureCache[key]
 
+func getVrmPathFromRect(rect : Rect2i) -> String:
+	
+	for vrmRrect in vrmRects:
+		if vrmRrect.encloses(rect):
+			return vrmRects[vrmRrect]
+	
+	
+	return ""
+	
+
+
+func writePaletteToVRM(vrmFile, pos : Vector2i,bytes : PackedByteArray):
+	var rectInVrm : Rect2i
+	var palRect  = Rect2i(pos,Vector2i(16,1))
+	
+	
+	for i  in vrmRects:
+		if i.encloses(palRect):
+			rectInVrm = i
+			break
+			
+		
+	if rectInVrm.size == Vector2i(0,0):
+		return
+	
+	modifyVRM(vrmFile,palRect,bytes,true)
+	
+
+func modifyVRM(vrmFile ,rect : Rect2i,bytes : PackedByteArray,isPaletteData : bool):
+	var magic = vrmFile.get_32()
+	
+	if magic != 0x20:
+		breakpoint
+	
+	
+	for tim in 2:
+		var pos = vrmFile.get_position()
+		
+		var size = vrmFile.get_32()
+		var magic2 = vrmFile.get_32()
+		var flags = vrmFile.get_32()
+		var bpp = flags & 0b11
+		var hasCLUT = (flags >> 3) & 1
+		
+		if hasCLUT:
+			breakpoint
+		
+		var image_len = vrmFile.get_32()
+
+		var vramX = vrmFile.get_16()
+		var vramY = vrmFile.get_16()
+		var w = vrmFile.get_16()
+		var h = vrmFile.get_16()
+		
+		var pPos = vrmFile.get_position()
+		var timRect = Rect2i(vramX,vramY,w,h)
+		var t = timByteCountFromW(w,bpp)*h
+		
+		if timRect.encloses(rect):
+			
+			
+			var imageData : PackedByteArray= []
+			imageData.resize(t)
+		
+			for i in imageData.size():
+				imageData[i] = vrmFile.get_8() 
+			
+			var newBytes
+			
+			
+			if !isPaletteData:
+				newBytes = modifyTimData(imageData,timRect,rect,bytes,w,h)
+			else:
+				newBytes = modifyTimPaletteData(imageData,timRect,rect,bytes,w,h)
+				
+			vrmFile.seek(pPos)
+			vrmFile.store_buffer(newBytes)
+			if vrmFile is not ISOFileWrapper:
+				vrmFile.close()
+			return
+			
+		
+		vrmFile.seek(pos+size+4)
+		
+		
+		
+	
+	pass
+
+func modifyTimData(timData: PackedByteArray, timRect: Rect2i, rect: Rect2i, data: PackedByteArray, w: int, h: int):
+	var relativePos : Vector2i = (rect.position - timRect.position)*2
+	var startOffset = (relativePos.x)+(relativePos.y*timRect.size.x)
+
+	var count = 0
+	
+	var ht = (rect.size.y)
+	var w2 = (rect.size.x)*2
+	
+	
+	for y in ht:
+		for x in w2:
+			var offset = (relativePos.x+x)+(relativePos.y+(2*y))*timRect.size.x
+			
+			
+			var low = data[count] & 0x0F
+			var high = data[count + 1] & 0x0F
+			timData[offset] = (high << 4) | low
+
+			count +=2 
+
+	return timData
+	
+	
+func modifyTimPaletteData(timData: PackedByteArray, timRect: Rect2i, rect: Rect2i, data: PackedByteArray, w: int, h: int):
+	var relativePos : Vector2i = (rect.position - timRect.position)*2
+	var startOffset = (relativePos.x)+(relativePos.y*timRect.size.x)
+	var initalOffset = (relativePos.x)+(relativePos.y)*timRect.size.x
+	var test1 = (relativePos.x)+(relativePos.y*timRect.size.x)
+	var ht = (rect.size.y)
+	var w2 = (rect.size.x)
+	#max 37200
+	#max 37150 (one pixel left)
+	#max 37140 (6 pixels left)
+	#max 37135 (9 pixels left)
+	#max 37131 (11 pixels left?)
+	#max 37122 (only missing 1 pixel
+	var totalBytes = (ht*w2)
+	#25000 wheels?
+	#min 34100
+	#max 34101
+	var t = 37120
+
+	var huh = (relativePos.x+0)+(relativePos.y+(2*0))*timRect.size.x
+	for i in 16:
+		timData[37121+i] = data[i]
+	
+	#timData[t] = data[0]
+	
+	#for i in range(33100,t):
+	#		timData[i] = 0
+	
+	return timData
+	
+	for y in ht:
+		for x in w2:
+			var offset = (relativePos.x+x)+(relativePos.y+(2*y))*timRect.size.x
+			timData[offset] = data[x]
+	
+	return timData
+
 func textureLayoutToImageInner(textureLayout,paletteCache = {}):
 	
 	var bpp = textureLayout["bpp"]
@@ -577,7 +755,7 @@ func textureLayoutToImageInner(textureLayout,paletteCache = {}):
 	var palPos = textureLayout["pallete"]
 	
 	
-	var texture  = []
+	var texture  : PackedByteArray= []
 	texture.resize(dim.x*dim.y*2)
 	
 	var sourceStartOffset =  ((yStartPixel*2048)+xStartPixel)/2#1 byte per pixel>
@@ -585,6 +763,8 @@ func textureLayoutToImageInner(textureLayout,paletteCache = {}):
 	
 	if bpp == 1:
 		sourceStartOffset += 0
+		
+	
 	#2048x512 
 	for y in dim.y:
 		for x in dim.x:
@@ -674,10 +854,54 @@ func convert_5551_to_rgb(val: int) -> Color:
 	if r == 0 and g == 0 and b == 0 and a == 0:
 		return Color.TRANSPARENT
 	
-	
-	#cachedColor = Color(r,g,b,1)
 
 	return Color(r,g,b,1)
+	
+
+func convert_rgb_to_5551(color: Color) -> int:
+	var r = int(clamp(round(color.r * 31.0), 0, 31))
+	var g = int(clamp(round(color.g * 31.0), 0, 31))
+	var b = int(clamp(round(color.b * 31.0), 0, 31))
+	var a = 0
+	
+	
+	if color == Color.TRANSPARENT:
+		return 0
+	else:
+		a = 1
+
+	var val = (a << 15) | (b << 10) | (g << 5) | r
+	return val
+
+func colorB(val: int) -> PackedByteArray:
+	var bytes = PackedByteArray()
+	bytes.append(val & 0xFF)         # Lower byte (little-endian)
+	bytes.append((val >> 8) & 0xFF)  # Upper byte
+	return bytes
+
+func colorToBytes(color: Color, alpha_bit := 1) -> PackedByteArray:
+	var r = int(clamp(color.r * 31.0, 0, 31)) & 0x1F
+	var g = int(clamp(color.g * 31.0, 0, 31)) & 0x1F
+	var b = int(clamp(color.b * 31.0, 0, 31)) & 0x1F
+	var a = alpha_bit
+	
+	var val = (a << 15) | (b << 10) | (g << 5) | r
+	return colorB(val)
+
+func color_to_abgr8888_bytes(color: Color) -> PackedByteArray:
+	var r = int(clamp(round(color.r * 255.0), 0, 255))
+	var g = int(clamp(round(color.g * 255.0), 0, 255))
+	var b = int(clamp(round(color.b * 255.0), 0, 255))
+	var a = int(clamp(round(color.a * 255.0), 0, 255))
+
+
+	var bytes = PackedByteArray()
+	bytes.append(r)  # X
+	bytes.append(g)  # Y
+	bytes.append(b)  # Z
+	bytes.append(a)  # W
+
+	return bytes
 
 func fetchTexture( textureName : String):
 	

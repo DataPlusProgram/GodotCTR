@@ -11,10 +11,11 @@ extends Node
 
 var debug = true
 
-var mapScaleFactor = 0.012
+var mapScaleFactor := 0.012
+var rotScaleFactor := 0.000244140625
 #var mapScaleFactor = (1.0 / (1 << 12))
-#@onready var mapScaleFactor = (1.0 / (1 << 12))0.000244140625
-#@onready var mapScaleFactor = (1.0 / (1 << 8))  0.00390625
+#var mapScaleFactor = (1.0 / (1 << 12))#0.000244140625
+#@onready var mapScaleFactor = (1.0 / (1 << 8)) # 0.00390625
 
 var textureCache = {}
 var paletteCache = {}
@@ -90,7 +91,8 @@ func createMap(mapName : String):
 	if debug:
 		map.set_meta("offsetInIso",(mapOffset * 2048) + rootOffset)
 		map.set_meta("mapSizeInBytes",mapSize)
-	
+		
+		#map.set_meta("colorss",colors)
 	return map
 	
 
@@ -183,8 +185,20 @@ func readScene(data : StreamPeerBuffer,patchTable : PackedInt32Array,textureData
 	data.seek(header["iconsOffset"]+4)
 	var iconTextureLayouts = createIcons(data)
 	
-	#data.seek(header["modelsOffset"])
-	#createMapSubModels(data,header["numModels"],textureData)
+	data.seek(header["modelsOffset"])
+	var modelDict : Dictionary[int,Node3D]= createMapSubModels(data,header["numModels"],textureData)
+	
+	
+	
+	data.seek(header["instancesOffset"]+4)
+	var instanceDict := createMapInstances(data,header["numInstances"])
+	
+	if debug:
+		rootNode.set_meta("modelDict",modelDict)
+		rootNode.set_meta("instances",instanceDict)
+	
+	spawnInstances(rootNode,instanceDict,modelDict)
+	
 	return rootNode
 	
 
@@ -230,9 +244,13 @@ func readMeshInfo(data : StreamPeerBuffer):
 	
 	
 	data.seek(vertsOffset2+4)
+	
 	var ret = getVerts(data,numVerts)
 	verts = ret[0]
 	colors = ret[1]
+	
+	
+		
 	
 	var dimRet := getMapDim(verts)
 	var minDim := dimRet[0]
@@ -253,8 +271,11 @@ func readMeshInfo(data : StreamPeerBuffer):
 	root.name="testMap"
 
 	if debug:
+		root.set_meta("colors",colors)
 		root.set_meta("blocksInfo",blockInfo)
 		root.set_meta("quadBlocksOffset",quadBlocksOffset2+4)
+		root.set_meta("vertsOffset",vertsOffset2+4)
+		
 	
 
 	var matCache = {}
@@ -263,22 +284,18 @@ func readMeshInfo(data : StreamPeerBuffer):
 		
 		
 		var center = getBlockCenter(blocks[i])
-		
 		var info = blockInfo[i]
-		
 		var meshInstance : MeshInstance3D = renderBlock(blocks[i],blocksColors[i],blockTextures[i],info,center)
 		
 		if debug:
 			meshInstance.set_meta("blockIdx",i)
 		
 		var cols = []
-		if (info["quadFlags"] & QuadFlags.NoCollision) == 0:
+		if (info["quadFlags"] & QuadFlags.NoCollision) == 0 or debug:
 			cols = funcCreateBlockCollision(blocks[i],center)
 			
-		
-		
+
 		var body = StaticBody3D.new()
-		
 		
 		for surfIdx in 4:
 			var image = blockTextures[i][surfIdx]["image"]
@@ -287,7 +304,12 @@ func readMeshInfo(data : StreamPeerBuffer):
 				var m = StandardMaterial3D.new()
 				m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 				m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+				
+				if info["doubleSided"]:
+					m.cull_mode = BaseMaterial3D.CULL_DISABLED
+				
 				m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+				#m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 				m.vertex_color_use_as_albedo = true
 				m.albedo_texture = ImageTexture.create_from_image(image)
 				matCache[image] = m
@@ -319,124 +341,6 @@ func getMapDim(verts) -> Array[Vector3]:
 	
 	
 	return [minDim,maxDim]
-		
-	
-func order_points_ccw(points: PackedVector3Array) -> PackedVector3Array:
-	assert(points.size() == 4)
-
-	# Step 1: Calculate the polygon normal
-	var normal = (points[1] - points[0]).cross(points[2] - points[0]).normalized()
-
-	# Step 2: Compute the centroid of the points
-	var centroid = Vector3()
-	for p in points:
-		centroid += p
-	centroid /= points.size()
-
-	# Step 3: Define local coordinate axes on the plane
-	var axis_x = (points[0] - centroid).normalized()
-	var axis_y = normal.cross(axis_x)
-
-	# Step 4: Calculate angle for each point relative to centroid on plane
-	var points_with_angle = []
-	for p in points:
-		var vec = p - centroid
-		var x = vec.dot(axis_x)
-		var y = vec.dot(axis_y)
-		var angle = atan2(y, x)
-		points_with_angle.append({"point": p, "angle": angle})
-
-	# Step 5: Sort points by angle (CCW)
-	points_with_angle.sort_custom(
-		func(a, b):
-			if a["angle"] < b["angle"]:
-				return -1
-			else:
-				return 1
-)
-
-	# Step 6: Return sorted points as PackedVector3Array
-	var sorted_points = PackedVector3Array()
-	for item in points_with_angle:
-		sorted_points.append(item["point"])
-
-	return sorted_points
-func is_quad_convex(p: PackedVector3Array) -> bool:
-	if p.size() != 4:
-		return false
-
-	# Step 1: Get normal of plane (assumes p[0], p[1], p[2] define the plane)
-	var normal = (p[1] - p[0]).cross(p[2] - p[0]).normalized()
-
-	# Step 2: Project points to the plane's 2D basis (e.g. to X/Y-like space)
-	var x_axis = (p[1] - p[0]).normalized()
-	var y_axis = normal.cross(x_axis)
-
-	var projected := []
-	for point in p:
-		var vec = point - p[0]
-		projected.append(Vector2(vec.dot(x_axis), vec.dot(y_axis)))
-
-	# Step 3: Check convexity in 2D using cross product signs
-	var is_positive = null
-	for i in range(4):
-		var a = projected[i]
-		var b = projected[(i + 1) % 4]
-		var c = projected[(i + 2) % 4]
-
-		var ab = b - a
-		var bc = c - b
-		var cross = ab.cross(bc)
-
-		if is_positive == null:
-			is_positive = cross > 0
-		elif (cross > 0) != is_positive:
-			return false  # found a turn in the other direction → concave
-
-	return true
-
-func is_polygon_ccw(points: PackedVector3Array) -> bool:
-	# Assuming points size is 4
-	assert(points.size() == 4)
-
-	var normal = (points[1] - points[0]).cross(points[2] - points[0]).normalized()
-	var sum = 0.0
-
-	for i in range(points.size()):
-		var current = points[i]
-		var next = points[(i + 1) % points.size()]
-		var edge = next - current
-		sum += normal.dot(current.cross(next))
-
-	# If sum is positive, polygon is CCW relative to normal
-	return sum > 0
-
-func are_points_coplanar(a: Vector3, b: Vector3, c: Vector3, d: Vector3, epsilon := 0.0001) -> bool:
-	var normal = (b - a).cross(c - a).normalized()
-	var dist = abs((d - a).dot(normal))
-	return dist < epsilon
-
-func get_quad_corners(quad: Array, center: Vector3) -> PackedVector3Array:
-	# quad is an Array of two triangles: each triangle is Array of 3 Vector3
-	var unique_points = []
-	
-	for triangle in quad:
-		for point in triangle:
-			var pt = point - center
-			var exists = false
-			for up in unique_points:
-				if up.is_equal_approx(pt):
-					exists = true
-					break
-			if not exists:
-				unique_points.append(pt)
-	
-	# Make sure there are 4 unique points
-	assert(unique_points.size() == 4)
-
-	# Now order these points CCW (assuming planar quad)
-	var ordered_points = order_points_ccw(PackedVector3Array(unique_points))
-	return ordered_points
 
 
 func remove_duplicate_vectors(points: Array) -> Array:
@@ -600,40 +504,40 @@ func flipUV(uvs):
 	
 	
 
-func getQuadBlocks(data : StreamPeerBuffer,numQuadBlocks : int,verts : Array,c):
+func getQuadBlocks(data : StreamPeerBuffer,numQuadBlocks : int,verts : Array,c : PackedColorArray):
 	var blocks = []
 	var blocksInfo = []
 	var blockTextures = []
 	var blocksColors = []
 	
+	var quadBase = data.get_position()
+	
 	for q in numQuadBlocks:
-		var t = data.get_position()
-		var indices = []
+		var v = []
 		var colors = []
+		var indices = []
 		
 		for i in 9:
 			var index = data.get_u16()
-			
-			indices.append(verts[index])
+			indices.append(index)
+			v.append(verts[index])
 			colors.append(c[index])
 		
-		var tlQuad = [[indices[0],indices[4],indices[6]],[indices[0],indices[6],indices[5]]]
-		var trQuad = [[indices[4],indices[1],indices[7]],[indices[4],indices[7],indices[6]]]
-		var blQaud = [[indices[5],indices[6],indices[8]],[indices[5],indices[8],indices[2]]]
-		var brQuad = [[indices[6],indices[7],indices[3]],[indices[6],indices[3],indices[8]]]
+		var tlQuad = [[v[0],v[4],v[6]],[v[0],v[6],v[5]]]
+		var trQuad = [[v[4],v[1],v[7]],[v[4],v[7],v[6]]]
+		var blQaud = [[v[5],v[6],v[8]],[v[5],v[8],v[2]]]
+		var brQuad = [[v[6],v[7],v[3]],[v[6],v[3],v[8]]]
 		
+
 		var tlQuadColor = [[colors[0],colors[4],colors[6]],[colors[0],colors[6],colors[5]]]
 		var trQuadColor = [[colors[4],colors[1],colors[7]],[colors[4],colors[7],colors[6]]]
 		var blQaudColor = [[colors[5],colors[6],colors[8]],[colors[5],colors[8],colors[2]]]
 		var brQuadColor = [[colors[6],colors[7],colors[3]],[colors[6],colors[3],colors[8]]]
 		
-		
 		blocks.append([tlQuad,trQuad,blQaud,brQuad])
 		blocksColors.append([tlQuadColor,trQuadColor,blQaudColor,brQuadColor])
 		
-		
-		var quadFlags = data.get_16()
-		print(data.get_position()-t)
+		var quadFlags = data.get_u16()
 		var buffer =data.get_u32()
 		var drawOrderHigh = data.get_partial_data(4)[1]
 		var textureOffsets = []
@@ -643,6 +547,8 @@ func getQuadBlocks(data : StreamPeerBuffer,numQuadBlocks : int,verts : Array,c):
 		
 		var faceRotations = []
 		var faceModes = []
+		
+		var doubleSided = ((buffer >> 31) & 1) > 0;
 		
 		for i in 4:
 			var val = ((buffer >> 8 + 5 * i) & 0x1F)
@@ -664,7 +570,7 @@ func getQuadBlocks(data : StreamPeerBuffer,numQuadBlocks : int,verts : Array,c):
 		var unkTerrainFlag = data.get_8()
 		
 		var id = data.get_16()
-		var trackPost = data.get_8()
+		var trackPos = data.get_u8()
 		var midUnk = data.get_8()
 		
 		var lowTextureOffset = data.get_u32()
@@ -680,8 +586,8 @@ func getQuadBlocks(data : StreamPeerBuffer,numQuadBlocks : int,verts : Array,c):
 		var texturePos = data.get_position()
 		
 	
-		
-		blocksInfo.append({"quadFlags":quadFlags,"drawOrderHigh":drawOrderHigh,"faceRotations":faceRotations,"faceModes":faceModes})
+
+		blocksInfo.append({"quadFlags":quadFlags,"drawOrderHigh":drawOrderHigh,"faceRotations":faceRotations,"faceModes":faceModes,"terrainFlag":terrainFlag,"blocksColors":colors,"indices":indices,"checkpoint id":trackPos,"doubleSided":doubleSided,"textureOffsets":textureOffsets}) # todo make this debug only
 		blockTextures.append(parseTextureLayouts(data,lowTextureOffset,textureOffsets))
 		
 		data.seek(texturePos)
@@ -692,7 +598,6 @@ func getQuadBlocks(data : StreamPeerBuffer,numQuadBlocks : int,verts : Array,c):
 
 
 func parseTextureLayouts(data : StreamPeerBuffer,textureLowOffset,mainTextureOffsets):
-	data.seek(textureLowOffset+4)
 	var textureLayouts = []
 	var lowTextureInfo = imageLoader.parseTextureLayout(data)
 	
@@ -700,13 +605,10 @@ func parseTextureLayouts(data : StreamPeerBuffer,textureLowOffset,mainTextureOff
 	
 	for offset in mainTextureOffsets:
 		
-		#f offset != 0:
-		#	breakpoint
-		
+
 		data.seek(offset+4)
 		var textureInfo = imageLoader.parseTextureLayout(data)
 		imageLoader.textureLayoutToImage(textureInfo,paletteCache,textureCache)
-		#textureInfo["image"].save_png("res://dbg/danger%s.png" %[offset])
 		textureLayouts.append(textureInfo)
 		
 		
@@ -715,16 +617,27 @@ func parseTextureLayouts(data : StreamPeerBuffer,textureLowOffset,mainTextureOff
 	return textureLayouts
 
 func getVerts(data : StreamPeerBuffer,numVerts : int):
-	var verts = []
-	var colors = []
+	var a = Time.get_ticks_msec()
+	var verts : PackedVector3Array= []
+	var colors  : PackedColorArray = []
+	
+	verts.resize(numVerts)
+	colors.resize(numVerts)
 	
 	for i in numVerts:
-		verts.append(readVector(data,mapScaleFactor))
+		
+		verts[i] = (readVector(data,mapScaleFactor))
 		var pad = data.get_u16()#used in pre-release
-		colors.append(getColor(data.get_u32()))
+		
+		colors[i] = (getColor(data.get_u32()))
+		
 		var morphColor = data.get_u32()
+		
+		#if i == 5046:
+		#	breakpoint
 	
 	
+	#print(Time.get_ticks_msec()-a)
 	return [verts,colors]
 	
 func getColor(val):
@@ -739,7 +652,8 @@ func getColor(val):
 	var a = float(W) / 255.0
 	
 	if r == 0 and g == 0 and b == 0:
-		return Color.TRANSPARENT
+		
+		return Color(0.4,0.4,0.4)
 	
 	return Color(r, g, b, 1)
 
@@ -750,7 +664,7 @@ func getHeader(data : StreamPeerBuffer):
 	var skyboxOffset = data.get_u32()
 	var animTextureOffset = data.get_u32()
 	
-	var nunInstances = data.get_u32()
+	var numInstances = data.get_u32()
 	var instancesOffset = data.get_u32()
 	
 	var numModels = data.get_u32()
@@ -758,7 +672,7 @@ func getHeader(data : StreamPeerBuffer):
 	
 	var unkPtr1 = data.get_u32()
 	var unkPtr2 = data.get_u32()
-	var instancesPointerPointer = data.get_u32()
+	var instancesOffsetPointer = data.get_u32()
 	var unkPtr3 = data.get_u32()
 	
 	data.get_u32()
@@ -788,12 +702,20 @@ func getHeader(data : StreamPeerBuffer):
 	var startingLinePositions : PackedVector3Array = []
 	var startingLineRotations  : PackedVector3Array = []
 	
+	var startingPosOffset = data.get_position()
+	
 	for i in 8:
 		startingLinePositions.append(readVector(data,mapScaleFactor))
-		startingLineRotations.append(readVector(data,0.000244140625))
+		startingLineRotations.append(readVector(data,rotScaleFactor))
 	
 	
+	for i in 8:
+		startingLineRotations[i].y = (startingLineRotations[i].y*TAU) - (PI/2.0)
 	
+	#for i in 8:
+	#	startingLineRotations[i].y*= 6
+		
+		
 	var unkPtr4 = data.get_u32()
 	var unkPtr5 = data.get_u32()
 
@@ -807,24 +729,29 @@ func getHeader(data : StreamPeerBuffer):
 	var buildEndOffset = data.get_u32()
 	var bulidTypeOffset  =data.get_u32()
 	
-	return {"meshOffset":meshInfoOffset,"modelsOffset":modelsOffset,"numModels":numModels,"startingLinePositions":startingLinePositions,"startingLineRotations":startingLineRotations,"iconsOffset":iconsOffset}
+	return {"meshOffset":meshInfoOffset,"modelsOffset":modelsOffset,"numModels":numModels,"startingLinePositions":startingLinePositions,"startingLineRotations":startingLineRotations,"iconsOffset":iconsOffset,"instancesOffset":instancesOffset,"numInstances":numInstances}
 	
 	
 
 func readVector(buffer: StreamPeerBuffer,scale : float) -> Vector3:
+	#var test =buffer.get_partial_data(2)[1]
 	var x = buffer.get_16() * scale
 	var y = buffer.get_16() * scale
 	var z = buffer.get_16() * scale
 	return Vector3(x,y,z)
 
 
-func createMapSubModels(buffer: StreamPeerBuffer,numModels : int,textureData) :
+func createMapSubModels(buffer: StreamPeerBuffer,numModels : int,textureData) -> Dictionary[int,Node3D]:
 	var modelOffsets = []
-	
+	var ret : Dictionary[int,Node3D] = {}
 	for i in numModels:
 		modelOffsets.append(buffer.get_u32())
 	
 	for i in modelOffsets.size():
+		
+		if i == 0:
+			continue#why is the first model broken?
+		
 		var offset = modelOffsets[i]
 		var size = 0
 		
@@ -836,9 +763,121 @@ func createMapSubModels(buffer: StreamPeerBuffer,numModels : int,textureData) :
 		
 		
 		buffer.seek(0)
-		var ctrData = buffer.get_partial_data(buffer.get_size())[1]
+		var ctrData = buffer.get_partial_data(buffer.get_size())[1]#we read the entire map buffer and use custom offset parameter to map creator
 		var model = modelLoader.parseCTR(ctrData,textureData,offset)
-		#if model != null:
-		#	ENTG.saveNodeAsScene(model)
+		ENTG.saveNodeAsScene(model)
+		ret[offset] = model
+		
+	return ret
 		
 		
+func createMapInstances(buffer: StreamPeerBuffer,numInstances: int) -> Array[Dictionary]:
+	
+	var instanceDict : Array[Dictionary] = []
+	
+	for i in numInstances:
+		
+		
+		
+		var a = buffer.get_position()
+		
+		#if i == 9:
+		#	var bb = buffer.get_partial_data(16)[1]
+		#	breakpoint
+		
+		var iName = buffer.get_partial_data(16)[1].get_string_from_ascii()
+		
+		
+		#print(buffer.get_position()-a)
+		var modelOffset = buffer.get_u32()
+		
+		
+		var scale = readVector(buffer,mapScaleFactor)
+		var vectorPadding = buffer.get_u16()
+		
+		var nullValue = buffer.get_u32()
+		
+		if nullValue != 0:
+			breakpoint
+			
+		var unk1 = buffer.get_u32()
+		var t0 = buffer.get_position() - 4
+		
+		
+		buffer.seek(buffer.get_position()+(4*3))
+		var t = buffer.get_position() - 4
+		var x = buffer.get_position()
+		
+		#if i == 4:
+			#var aa0 = buffer.get_8()
+			#var ab0 = buffer.get_8()
+			#breakpoint
+		
+		
+		
+		var pos = readVector(buffer,mapScaleFactor)
+		var rot = readVector(buffer,rotScaleFactor)
+		var t3 = buffer.get_position() - 4
+		
+		
+		
+		var threadID = buffer.get_u32()
+		var dict : Dictionary = {"name":iName,"pos":pos,"rot":rot,"scale":scale,"modelOffset":modelOffset}
+		
+		instanceDict.append(dict)
+		
+		
+	return instanceDict
+		
+		
+		
+		
+func spawnInstances(rootNode : Node3D,instanceDicts,modelDict : Dictionary[int,Node3D]):
+	var count = 0
+	for i in instanceDicts:
+		var iName = i["name"]
+		var pos = i["pos"]
+		var rot = i["rot"]
+		
+		
+		rot.y = ((rot.y*TAU) - (PI/2.0)) * rotScaleFactor
+		
+		rootNode.add_child(createDebugInstance(iName,pos,rot,modelDict,i["modelOffset"],count))
+		count += 1
+		
+	
+
+func createDebugInstance(iName : String,pos : Vector3, rot : Vector3,modelDict,modelOffset,instanceIdx):
+	if !modelDict.has(modelOffset):
+		return
+			
+			
+	var model = modelDict[modelOffset].duplicate()
+		
+
+
+	model.name = iName
+	model.rotation = rot
+	model.position = pos
+	if debug:
+		model.set_meta("instance",instanceIdx)
+		model.set_meta("modelName",modelDict[modelOffset].name)
+		
+		
+		#collectible.add_child(model)
+		
+		#rootNode.add_child(collectible)
+	
+	var colShape = null
+	#if !model is MeshInstance3D:
+	if !model is MeshInstance3D:
+		colShape = EGLO.createAABBcollisionShape(model.get_child(0).get_child(0))
+	else:
+		colShape = EGLO.createAABBcollisionShape(model)
+		
+	var staticBody = StaticBody3D.new()
+	staticBody.add_child(colShape)
+	model.add_child(staticBody)
+	return model
+	
+	

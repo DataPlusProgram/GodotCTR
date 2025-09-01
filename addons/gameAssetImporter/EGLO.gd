@@ -50,6 +50,23 @@ static func saveVertArrAsScene(arr,sceneName = "poly",path = "res://dbg/"):
 	poly.polygon = arr.duplicate(true)
 	ENTG.saveNodeAsScene(poly,path)
 
+static func getCollisionShapeHeight(node : Node) -> float:
+	
+	if node == null:
+		return 0 
+	
+	var shape = node.shape
+	var shapeClass =  node.shape.get_class()
+
+	
+	if shapeClass == "BoxShape3D":
+		return shape.extents.y * 2.0
+	
+	
+	elif shapeClass == "CylinderShape3D" or shapeClass == "CapsuleShape3D":
+		return shape.height
+		
+	return 0.0
 
 static func drawVertsAsSpheres(tree,arr):
 	var root = Node3D.new()
@@ -75,7 +92,7 @@ static func drawVertsAsSpheres(tree,arr):
 	tree.get_root().add_child(root)
 	return root
 
-static func funcDrawAABB(par,node):
+static func funcDrawCustomAABB(par,node):
 	var aabb = node.custom_aabb
 	var mesh := CSGBox3D.new()
 	mesh.size = aabb.size
@@ -84,6 +101,23 @@ static func funcDrawAABB(par,node):
 	
 	par.add_child(mesh)
 	
+
+static func createAABBcollisionShape(mesh_instance: MeshInstance3D) -> CollisionShape3D:
+	var mesh = mesh_instance.mesh
+	if not mesh:
+		return
+
+	var aabb = mesh.get_aabb()
+	var box_shape = BoxShape3D.new()
+	box_shape.size = aabb.size
+
+	var collision_shape = CollisionShape3D.new()
+	collision_shape.shape = box_shape
+
+	var local_center = aabb.position + (aabb.size * 0.5)
+	collision_shape.transform.origin = local_center
+
+	return collision_shape
 
 static func givePlayerWeapons(playerNode : Node,allWeapons,gameName = ""):
 	
@@ -300,9 +334,10 @@ static func addChildNowOrDeferred(parent,child):
 		
 	parent.add_child.call_deferred(child)
 	
-static func rawRaycast(world : World3D,start : Vector3,end : Vector3):
+static func rawRaycast(world : World3D,start : Vector3,end : Vector3,exclude : Array= []):
 	var spaceState = world.direct_space_state
 	var query = PhysicsRayQueryParameters3D.create(start, end)
+	query.exclude = exclude
 	return spaceState.intersect_ray(query)  # Returns a dictionary with collision info or empty if no hit
 
 
@@ -423,6 +458,47 @@ static func playGrowAnimForNode(node,endScale,time = 0.2):
 static func playShrinkAnimForNode(node,endScale,time = 0.2):
 	var tween : Tween = node.create_tween()
 	tween.tween_property(node, "scale", endScale,time/2.0)
+	
+	
+
+static func playGrowMaskAnimForNode(node,endScale,time = 0.2):
+	var fakeMask = node.duplicate()
+	fakeMask.position = node.global_position
+	node.get_tree().get_root().add_child(fakeMask)
+	
+	if node.has_meta("animating") and node.get_meta("animating"):
+		return
+	
+	node.set_meta("animating", true)  # Mark animation as active
+
+	var tweenPos: Tween = node.create_tween()
+	var tweenScale: Tween = node.create_tween()
+	var startPos = node.global_position
+
+	# Calculate offset to keep GUI centered
+	var size = node.get_rect().size
+	var scaleDiff = endScale - Vector2.ONE # for now we will just assume unit transform
+	var offset = (scaleDiff * size) / 2.0
+
+	var endPos = startPos - offset  # Adjusted position to maintain centering
+	
+	# Animate to the enlarged position and scale
+	tweenPos.tween_property(fakeMask, "position", endPos, time / 2.0)
+	tweenScale.tween_property(fakeMask, "scale", endScale, time / 2.0)
+
+	await node.get_tree().create_timer(time / 2.0).timeout
+#
+	#Create new tweens to return to the original state
+	tweenPos = node.create_tween()
+	tweenScale = node.create_tween()
+
+	tweenPos.tween_property(fakeMask, "position", startPos, time / 2.0)
+	tweenScale.tween_property(fakeMask, "scale", Vector3.ONE, time / 2.0)#assume indentiy trasformm
+
+	await node.get_tree().create_timer(time / 2.0).timeout
+
+	node.set_meta("animating", false)  # Mark animation as finished
+	
 
 static func playGrowAndShrinkAnimForNode(node,startScale,endScale,time = 0.2):
 	var tween : Tween = node.create_tween()
@@ -595,14 +671,14 @@ static func pointsToPlane(points : PackedVector3Array):
 	
 	return [normal,dist]
 	
-static func displayNotice(node : Node,message : String):
+static func showMessage(node : Node,message : String):
 	var popup := AcceptDialog.new()
 	popup.dialog_text = message
 	node.add_child(popup)
 	
 	popup.popup_centered()
 	
-static func showOption(node : Node,message : String,yesText : String,noText : String):
+static func showOption(node : Node,message : String,yesText : String,noText : String) -> ConfirmationDialog:
 	var popup := ConfirmationDialog.new()
 	popup.dialog_text = message
 	popup.ok_button_text = yesText
@@ -611,3 +687,104 @@ static func showOption(node : Node,message : String,yesText : String,noText : St
 	
 	popup.popup_centered()
 	return popup
+
+static func drawAABBoultine(mesh_instance: MeshInstance3D):
+	var aabb = mesh_instance.mesh.get_aabb()
+	var immediate_mesh = ImmediateMesh.new()
+	var mat = StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_color = Color.RED
+
+	var mesh_instance_outline = MeshInstance3D.new()
+	mesh_instance_outline.mesh = immediate_mesh
+	mesh_instance_outline.material_override = mat
+	mesh_instance.get_parent().add_child(mesh_instance_outline)
+	immediate_mesh.surface_begin(Mesh.PRIMITIVE_LINES)
+
+	var corners = get_aabb_corners(aabb)
+
+	# Connect corners with lines
+	var edges = [
+		[0, 1], [1, 2], [2, 3], [3, 0],
+		[4, 5], [5, 6], [6, 7], [7, 4],
+		[0, 4], [1, 5], [2, 6], [3, 7],
+	]
+
+	for edge in edges:
+		immediate_mesh.surface_add_vertex(corners[edge[0]])
+		immediate_mesh.surface_add_vertex(corners[edge[1]])
+
+	immediate_mesh.surface_end()
+
+	mesh_instance_outline.transform.origin = mesh_instance.transform.origin
+	
+	return mesh_instance_outline
+	
+static func get_aabb_corners(aabb: AABB) -> Array:
+	var origin = aabb.position
+	var size = aabb.size
+
+	return [
+		origin,
+		origin + Vector3(size.x, 0, 0),
+		origin + Vector3(size.x, 0, size.z),
+		origin + Vector3(0, 0, size.z),
+		origin + Vector3(0, size.y, 0),
+		origin + Vector3(size.x, size.y, 0),
+		origin + Vector3(size.x, size.y, size.z),
+		origin + Vector3(0, size.y, size.z),
+	]
+
+
+static func findCamera3D(node : Node) -> Camera3D:
+	var parent : Node = node
+	
+	while(true):
+		parent = parent.get_parent()
+		
+		if parent == null:
+			return null
+		
+		if parent is Camera3D:
+			return parent
+			
+		
+		
+	return null
+		
+	
+static func multiHitRaycast(world: World3D, start: Vector3, end: Vector3, max_hits: int = 5) -> Array:
+	var results: Array = []
+	var from = start
+	var direction = (end - start).normalized()
+	var remaining_distance = (end - start).length()
+	var exclude: Array = []
+
+	for i in range(max_hits):
+		var to = from + direction * remaining_distance
+		var result = rawRaycast(world, from, to, exclude)
+
+		if result.is_empty():
+			break
+
+		results.append(result)
+
+		var hit_position = result.position
+		var distance_traveled = (hit_position - from).length()
+		remaining_distance -= distance_traveled
+		if remaining_distance <= 0.0:
+			break
+
+		# Nudge the start slightly beyond the last hit
+		from = hit_position + direction * 0.01
+		exclude.append(result.collider)
+
+	return results
+
+
+static func get16AsBytes(b16) -> PackedByteArray:
+	var buffer = StreamPeerBuffer.new()
+	buffer.put_16(b16)
+	buffer.seek(0)   
+	var bytes = buffer.get_data_array()
+	return bytes

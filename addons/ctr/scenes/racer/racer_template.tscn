@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://c6rl8rt2mfd5j"]
+[gd_scene load_steps=6 format=3 uid="uid://c6rl8rt2mfd5j"]
 
 [ext_resource type="Script" uid="uid://db03xb0srxcrc" path="res://addons/ctr/scenes/racer/racer_template.gd" id="1_fi4ug"]
 [ext_resource type="PackedScene" uid="uid://c86ca8w5tvtxl" path="res://addons/gameAssetImporter/scenes/orbCam/orbCam.tscn" id="2_ga3s6"]
+[ext_resource type="PackedScene" uid="uid://k3yruj1jf1rh" path="res://addons/gameAssetImporter/scenes/perfOverlay/perfInfo.tscn" id="4_bf2s0"]
 [ext_resource type="PackedScene" uid="uid://gbl2xgx80gwl" path="res://addons/gameAssetImporter/scenes/movement/movement.tscn" id="4_ga3s6"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_fi4ug"]
@@ -35,7 +36,16 @@ shape = SubResource("BoxShape3D_fi4ug")
 stepAmt = 0.8
 forwardSpeed = 1.2
 groundEmergeFix = true
+debug = true
+
+[node name="debug" type="Label3D" parent="movement"]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4613502, 0)
+billboard = 2
+text = "gyugyuguyyuguyg"
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+
+[node name="perfInfo" parent="." instance=ExtResource("4_bf2s0")]
 
 [editable path="visual/orbCam"]
