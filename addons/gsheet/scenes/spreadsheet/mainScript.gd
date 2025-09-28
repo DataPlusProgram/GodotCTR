@@ -1572,7 +1572,7 @@ func dataIntoSpreadsheet(arr : Dictionary) -> void:
 	needsSaving = false
 	
 	var meta : Dictionary = arr["meta"]
-	var cat : Array = meta["colNames"]#arr.pop_front()# getCategories(dict)
+	var cat : Array = meta["colNames"]
 	
 	
 	var numCat : int = cat.size()

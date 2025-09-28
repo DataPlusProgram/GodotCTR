@@ -222,7 +222,7 @@ func createModel(modelName : String,params = {}):
 
 
 func getAllCategories():
-	return ["entities","maps","models","textures","game modes"]
+	return ["models","game modes"]
 
 func getConfigs():
 	return ["CTR"]

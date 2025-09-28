@@ -4,19 +4,19 @@
 
 [node name="Arrow" type="Node3D"]
 script = ExtResource("1_nknaf")
-length = 0.5080000000016298
-headLength = 0.16000000000349246
-headThickness = 0.09799999999813735
-baseThickness = 0.04499999999825377
+length = 0.508
+headLength = 0.16
+headThickness = 0.098
+baseThickness = 0.045
 
 [node name="CSGCylinder3D" type="CSGCylinder3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, -0.174)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -0.174)
 radius = 0.045
 height = 0.348
 sides = 21
 
 [node name="CSGCylinder3D2" type="CSGCylinder3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, -0.428)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, -0.428)
 radius = 0.098
 height = 0.16
 sides = 21

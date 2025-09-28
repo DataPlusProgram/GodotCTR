@@ -11,6 +11,7 @@ metadata/_tab_index = 0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
 layout_mode = 2
+theme_override_constants/separation = 6
 alignment = 1
 
 [node name="addonsPath" parent="HBoxContainer" instance=ExtResource("1_gls51")]
@@ -19,14 +20,17 @@ layout_mode = 2
 size_flags_horizontal = 1
 many = false
 
+[node name="Label" parent="HBoxContainer/addonsPath/h" index="0"]
+text = "source:"
+
 [node name="pathTxt" parent="HBoxContainer/addonsPath/h" index="1"]
-custom_minimum_size = Vector2(300, 0)
+custom_minimum_size = Vector2(363.895, 0)
 text = "res://addons"
 
 [node name="addonDirButton" type="Button" parent="HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Open"
+text = "Open source dir"
 
 [node name="SymText" type="Button" parent="HBoxContainer"]
 layout_mode = 2

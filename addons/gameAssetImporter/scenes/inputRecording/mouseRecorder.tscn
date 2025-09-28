@@ -1,0 +1,46 @@
+[gd_scene load_steps=2 format=3 uid="uid://dgbbi1pi4r8ap"]
+
+[ext_resource type="Script" uid="uid://djo5c0v5a6g4p" path="res://addons/gameAssetImporter/scenes/inputRecording/mouseRecorder.gd" id="1_k36b2"]
+
+[node name="mouseRecorder" type="Node"]
+script = ExtResource("1_k36b2")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ItemList" type="ItemList" parent="Control/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/VBoxContainer"]
+layout_mode = 2
+
+[node name="Save" type="Button" parent="Control/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Save"
+
+[node name="Load" type="Button" parent="Control/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Play"
+
+[connection signal="visibility_changed" from="Control" to="." method="_on_control_visibility_changed"]
+[connection signal="pressed" from="Control/VBoxContainer/HBoxContainer/Save" to="." method="_on_button_pressed"]
+[connection signal="pressed" from="Control/VBoxContainer/HBoxContainer/Load" to="." method="_on_load_pressed"]

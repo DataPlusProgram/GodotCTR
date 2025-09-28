@@ -2,6 +2,7 @@ extends Node
 @onready var console = $"../.."
 @onready var consoleRoot : Window =  $"../../../"
 
+var recordScene : Window = null
 
 func close():## Hides the console
 	consoleRoot.hide()
@@ -190,4 +191,12 @@ func mapnames():
 
 func clearentitycache():
 	ENTG.clearEntityCaches(get_tree())
+
+
+
+func record():
+	if recordScene == null:
+		recordScene = load("res://addons/gameAssetImporter/scenes/inputRecording/recordWindow.tscn").instantiate()
 	
+		get_tree().get_root().add_child(recordScene)
+	recordScene.popup_centered()

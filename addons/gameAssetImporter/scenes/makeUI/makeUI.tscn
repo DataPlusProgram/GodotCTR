@@ -25,18 +25,21 @@ grow_vertical = 2
 [node name="h" parent="." instance=ExtResource("2_fbjal")]
 
 [node name="gameList" parent="h/v1/Panel" index="0"]
-item_count = 1
+item_count = 7
 item_0/text = "CTR"
+item_1/text = "Doom"
+item_2/text = "Doom Mod"
+item_3/text = "Hexen"
+item_4/text = "Hexen Mod"
+item_5/text = "SRBC"
+item_6/text = "Meridian 59"
 
 [node name="gameNameEdit" parent="h/v1/paths/v/h" index="1"]
-text = "ctr"
+text = "doom mod"
 
 [node name="playButton" parent="h/v1/paths/v/HBoxContainer" index="1"]
 visible = false
 focus_neighbor_bottom = NodePath("../../../../Panel/gameList")
-
-[node name="creditsButton" parent="h/v1/paths/v/HBoxContainer" index="3"]
-visible = false
 
 [node name="MarginContainer" type="MarginContainer" parent="h/v2" index="0"]
 layout_mode = 2
@@ -58,6 +61,7 @@ theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
 [node name="SubViewport" parent="h/v3/preview/MarginContainer/SubViewportContainer" index="0"]
+handle_input_locally = false
 size = Vector2i(536, 413)
 
 [node name="CameraTopDown" parent="h/v3/preview/MarginContainer/SubViewportContainer/SubViewport" index="0"]

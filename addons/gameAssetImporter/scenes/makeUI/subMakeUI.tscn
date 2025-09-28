@@ -166,6 +166,7 @@ script = ExtResource("1_0jgmu")
 [node name="SubViewport" type="SubViewport" parent="v3/preview/MarginContainer/SubViewportContainer"]
 unique_name_in_owner = true
 world_3d = SubResource("World3D_j03yw")
+handle_input_locally = false
 size = Vector2i(548, 452)
 render_target_update_mode = 4
 
@@ -218,6 +219,7 @@ unique_name_in_owner = true
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
+alignment = 1
 
 [node name="Label" parent="v3/preview/MarginContainer/soundFontPath/h" index="0"]
 text = "SoundFont path:"

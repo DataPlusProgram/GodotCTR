@@ -1087,7 +1087,7 @@ static func getDirsInDir(dirPath) -> PackedStringArray :
 
 	return ret
 	
-static func getGenerator(scenePath) -> Array[Node]:
+static func instanceSceneAndGenerator(scenePath) -> Array[Node]:
 	var packedScene : PackedScene =  ResourceLoader.load(scenePath,"",0)
 	
 	if packedScene == null:
@@ -1132,12 +1132,14 @@ static func createEntity(entityName : StringName ,params : Dictionary,entityEntr
 	#		if entityEntry["category"] == &"npcs":
 	#			return null
 	
+	#fetch dependant entities
 	if entityEntry.has("depends"):
 		
 		var deps = entityEntry["depends"]
 		
 		if typeof(deps) != TYPE_ARRAY:
 			deps = [deps]
+			
 		for i in deps:
 			
 			if typeof(i) != TYPE_STRING:
@@ -1148,20 +1150,19 @@ static func createEntity(entityName : StringName ,params : Dictionary,entityEntr
 			if cache != null:
 				cache.queue_free()
 				
-
-	if entityEntry.has("creationFunction"):
+	
+	if entityEntry.has("creationFunction"):#ent = createFromCode
 		if !entityEntry["creationFunction"].is_empty():
 			var function = entityEntry["creationFunction"]
 
 			if function!= "":
-				#ent = entityLoader.createFromCode(entityEntry,function,parent.gameName)
 				ent = createFromCode(entityLoader,entityEntry,function,params)
 				if ent == null:
 					return
-					breakpoint
+					
 			
 
-	elif entityEntry.has("sourceScene"):
+	elif entityEntry.has("sourceScene"):#ent = sceneBasedInstance
 		
 		var postCreationFunction = null
 		
@@ -1214,7 +1215,7 @@ static func createFromCode(entityCreator : Node,entityEntry : Dictionary,functio
 static func sceneBasedInstance(scenePath : String,resourceManager : Node,entityLoader : Node = null,scale : Vector3 = Vector3.ONE,postCreationFunction = null,specificCacheParent = null):
 	
 
-	var ret : Array[Node] = getGenerator(scenePath)
+	var ret : Array[Node] = instanceSceneAndGenerator(scenePath)
 	
 	var generator : Node = ret[0]
 	var scene: Node = ret[1]
@@ -1223,14 +1224,10 @@ static func sceneBasedInstance(scenePath : String,resourceManager : Node,entityL
 
 		generator.resourceManager = resourceManager
 		
-		if "entityLoader" in generator:
-			generator.entityLoader = entityLoader
-		
-		if "scaleFactor" in generator:
-			generator.scaleFactor = scale
-		
-		if "cacheParent" in generator:
-			generator.cacheParent = specificCacheParent
+		#popluate standard values in generator
+		if "entityLoader" in generator: generator.entityLoader = entityLoader
+		if "scaleFactor" in generator:  generator.scaleFactor = scale
+		if "cacheParent" in generator:  generator.cacheParent = specificCacheParent
 		
 		generator.initialize()
 		
@@ -1251,9 +1248,6 @@ static func sceneBasedInstance(scenePath : String,resourceManager : Node,entityL
 		
 		
 		if postCreationFunction != null:
-			#var t0 = postCreationFunction.get_bound_arguments_count()
-			#postCreationFunction = postCreationFunction.bind(scene)
-			#var t01 = postCreationFunction.get_bound_arguments_count()
 			postCreationFunction.call(scene)
 			
 		
@@ -1443,7 +1437,7 @@ static func createAndInitializeLoader(tree :SceneTree,configName : String,param 
 				return inst
 	
 
-static func initializeLader(tree,loader : Node,param,configName,gameName):
+static func initializeLader(tree : SceneTree,loader : Node,param,configName,gameName : String):
 	loader.initialize(param,configName,configName)
 	createEntityCacheForGame(tree,false,configName,loader,tree)
 	if !loader.is_inside_tree():

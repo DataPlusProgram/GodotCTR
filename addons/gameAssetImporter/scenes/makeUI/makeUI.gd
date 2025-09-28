@@ -41,8 +41,6 @@ var editorInterface = null
 var gameToLoaderNode ={}
 var gameToLoaderNodeDisk ={}
 var gameToHistory = {}
-var runTailImport = false
-var tailEntStr = ""
 var previousFiles = {}
 var midiPlayer = null
 var curGameName = ""
@@ -268,14 +266,25 @@ func _on_loadButton_pressed():
 
 
 func validatePaths():
+	
+	
 	for i in paths.get_children():
-		if i.required == true and i.getPath().is_empty():
+		var iPath = i.getPath()
+		if i.required == true and iPath.is_empty():
 			i.setErrorText("*required")
 			return false
 		
-		if !FileAccess.file_exists(i.getPath()):
-			i.setErrorText("Invalid path (File not found)")
-			return false
+		
+		if iPath.contains("."):
+			if !FileAccess.file_exists(iPath):
+				i.setErrorText("Invalid path (File not found: %s)" % [iPath])
+				return false
+		
+		else:
+			if !DirAccess.dir_exists_absolute(iPath):
+				i.setErrorText("Invalid path (File not found: %s)" % [iPath])
+				return false
+			
 			
 		i.setErrorText("")
 		return true
@@ -286,11 +295,8 @@ func loaderInit(fast = false):
 	if !validatePaths():
 		return
 	
-	
-	
 	for i in paths.get_children():
 		param.append(i.getPath())
-	
 	
 	if cur == null:
 		return
@@ -302,12 +308,12 @@ func loaderInit(fast = false):
 		add_child(cur)
 		oldCur.queue_free()
 		cur.params = [param,curGameName]
-		cur.initialize(param,curGameName,(nameLabel.text).to_lower())
+		cur.initialize(param,curGameName.to_lower(),(nameLabel.text).to_lower())
 		
 		
 	else:
 		cur.params = [param,curGameName]
-		cur.initialize(param,curGameName,(nameLabel.text).to_lower())
+		cur.initialize(param,curGameName.to_lower(),(nameLabel.text).to_lower())
 	
 	
 	
@@ -337,11 +343,11 @@ func loaderInit(fast = false):
 	if is_instance_valid(curTree):
 		curTree.queue_free()
 	
-	var all = cur.getAllCategories()
+	var all = getCategories()
 	var tree = createTree()
 	curTree = tree
 	
-	
+
 	var meta
 	
 	if all.has("meta"):
@@ -381,8 +387,12 @@ func createTree():
 func collapseOrExpand(item):
 	var itemText : String = item.get_text(0)
 	
+	
+	var categories =  getCategories()
+	
+	
 	if !itemText.is_empty():
-		if cur.getAllCategories().has(itemText):
+		if categories.has(itemText):
 			itemSelected(item)
 			
 func populateSection(tree : Tree,item : TreeItem,subItems,meta):
@@ -470,6 +480,7 @@ func itemSelected(itemOveride = null):
 		return
 	
 	await get_tree().physics_frame
+	
 	var item : TreeItem= curTree.get_selected()
 	
 	if itemOveride != null:
@@ -529,6 +540,7 @@ func itemSelected(itemOveride = null):
 			
 		else:
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+			print(previewWorld.get_node("CameraTopDown").current ,",",previewWorld.get_node("Camera3D").current )
 			previewWorld.get_node("CameraTopDown").current = false
 			previewWorld.get_node("Camera3D").current = true
 	
@@ -621,6 +633,9 @@ func itemSelected(itemOveride = null):
 		if x is Image:
 			texturePreview.texture.image = x
 			
+		if x is Sprite2D:
+			texturePreview.texture.image = x.texture.image
+			
 	elif cat == "game modes":
 		clearEnt()
 		if cur.has_method("createGameModePreview"):
@@ -669,14 +684,14 @@ func itemSelected(itemOveride = null):
 			var midiData :  PackedByteArray= cur.createMidi(txt)
 			ENTG.setMidiPlayerData(midiPlayer,midiData)
 			midiPlayer.play()
-			$h/v3/preview/sondFontPath.visible = true
+			$h.get_node("%soundFontPath").visible = true
 		
 		elif categoryHierarchy.has("midi"):
 			var midiData : PackedByteArray= cur.createMidi(txt)
 			ENTG.setMidiPlayerData(midiPlayer,midiData)
 			midiPlayer.play()
-			$h/v3/preview/sondFontPath.visible = true
-			
+			$h.get_node("%soundFontPath").visible = true
+
 			
 		
 
@@ -1427,24 +1442,19 @@ func createMapThreaded(arr):
 	emit_signal("diskInstance",ResourceLoader.load(destPath).instantiate())
 	
 
-var headThread = null
 
 func _on_importButton_pressed():
 	oldName = cur.gameName
 	
-	
 	if curEntTxt.is_empty():
 		return
 	
-	
-	if "toDisk" in cur:#legacy
+	if "toDisk" in cur:#loader has this var. Once set on every resource fetch will save to disk:
 		pToDisk  = cur.toDisk
 		cur.toDisk = true
 		
 	cur.gameName = oldName.split("_")[0]
 	
-		
-	headThread = Thread.new()
 	importHead()
 	
 
@@ -1454,11 +1464,7 @@ func importHead():
 		createDirectories(nameLabel.text,cur.getReqDirs())
 	else:
 		createDirectories(nameLabel.text)
-		
-	var targetTree = get_tree()
 	
-	
-	tailEntStr = curEntTxt
 	var categoryHierarchy = cat.split("/")
 	
 	if cat == "maps":
@@ -1473,7 +1479,7 @@ func importHead():
 				for entityName in i[1]:
 					resEntries += ENTG.getEntityResourceEntries(cur,entityName)
 		
-		saveAllToDiskFunction(resEntries,true)
+		saveAllEntriesToDisk(resEntries,true)
 		fileWaiter.queuedSaves.append(saveMapToDisk.bind(curEntTxt))
 		
 		#cur.createMapResourcesOnDisk(curEntTxt,curMeta,editorInterface)
@@ -1496,30 +1502,30 @@ func importHead():
 		
 		fileWaiter.queuedSaves.append(saveEntitiesToDisk.bind(entityEntries.keys()))
 		fileWaiter.queuedSaves.append(saveModeToDisk.bind(curEntTxt))
-		saveAllToDiskFunction(entries)
+		saveAllEntriesToDisk(entries)
 		
 		
 		
 		
 	elif categoryHierarchy.has("midi") or categoryHierarchy.has("mus"):
 		var entries = getEntry(curEntTxt,cur.getAllMusicEntries())
-		saveAllToDiskFunction(entries)
+		saveAllEntriesToDisk(entries)
 		
 
 	elif cat == "textures" or categoryHierarchy.has("textures"):
 		
-		#var entries = getEntry(curEntTxt,cur.getAllTextureEntries())
 		var resType = categoryHierarchy[categoryHierarchy.size()-1]
 		
-		saveAllToDiskFunction([[resType,curEntTxt]])
+		saveAllEntriesToDisk([[resType,curEntTxt]])
 		
 	elif cat == "fonts":
 		var fontEntries = cur.getAllFontEntries()
 		var entries = fontEntries[curEntTxt]
-		saveAllToDiskFunction(entries,true)
+		saveAllEntriesToDisk(entries,true)
 		fileWaiter.queuedSaves.append(saveFontToDisk.bind(curEntTxt))
 		
-		
+	elif cat == "models":
+		breakpoint
 	
 	elif cat == "themes":
 		curMeta["destPath"] = "res://game_imports/"+cur.gameName +"/themes/"
@@ -1527,7 +1533,7 @@ func importHead():
 	else:
 		var visited = []
 		var entries = ENTG.getEntityResourceEntries(cur,curEntTxt,visited)
-		saveAllToDiskFunction(entries,true)
+		saveAllEntriesToDisk(entries,true)
 		
 		fileWaiter.queuedSaves.append(saveEntitiesToDisk.bind(visited))
 		
@@ -1539,9 +1545,9 @@ func importHead():
 var mapThread = Thread.new()
 
 
-func saveAllToDiskFunction(entries,blocking =true):
+func saveAllEntriesToDisk(resourceEntries,blocking =true):
 	var procced = {}
-	for entry in entries:
+	for entry in resourceEntries:
 		
 		
 		if entry.is_empty():
@@ -1554,7 +1560,7 @@ func saveAllToDiskFunction(entries,blocking =true):
 			
 			for fontName in fontEntries:
 				for subEntry in fontEntries[fontName]:
-					saveAllToDiskFunction([subEntry])
+					saveAllEntriesToDisk([subEntry])
 			
 			continue
 		
@@ -1572,12 +1578,12 @@ func saveAllToDiskFunction(entries,blocking =true):
 			
 			
 
-func saveToDiskFunction(entry,blocking):
+func saveToDiskFunction(resourceEntry,blocking):
 	
-	if entry[0] == "entity":
+	if resourceEntry[0] == "entity":
 		return
 	
-	var f: Callable = cur.resourceTypeToCreateFunction[entry[0]]
+	var f: Callable = cur.resourceTypeToCreateFunction[resourceEntry[0]]
 	
 	var extension = ".png"
 	var path = "textures"
@@ -1585,21 +1591,21 @@ func saveToDiskFunction(entry,blocking):
 	var resources = []
 	
 	
-	if entry[1] is PackedStringArray:
-		resources = entry[1]
+	if resourceEntry[1] is PackedStringArray:
+		resources = resourceEntry[1]
 	else:
-		resources = [entry[1]]
+		resources = [resourceEntry[1]]
 	
 	
-	if entry.size() == 3:
-		params = entry[2]
+	if resourceEntry.size() == 3:
+		params = resourceEntry[2]
 	
 	if params.has("extension"):
 		extension = params["extension"]
 	
 	if "resourceTypeDefaultSaveDir" in cur:
-		if cur.resourceTypeDefaultSaveDir.has(entry[0]):
-			path =  cur.resourceTypeDefaultSaveDir[entry[0]]
+		if cur.resourceTypeDefaultSaveDir.has(resourceEntry[0]):
+			path =  cur.resourceTypeDefaultSaveDir[resourceEntry[0]]
 	
 	if params.has("path"):
 		path = params["path"]
@@ -1608,7 +1614,10 @@ func saveToDiskFunction(entry,blocking):
 	
 	
 	for i in resources:
-		var filePath = "res://game_imports/"+cur.gameName+"/"+path+"/"+i+extension
+		
+		
+		var filePath = "res://game_imports/"+cur.gameName+"/"+path+"/"+i.get_file().split(".")[0]+extension
+	#	var filePath = "res://game_imports/"+cur.gameName+"/"+path+"/"+i+extension
 		
 		filePath = filePath.replace("\\","--")
 		
@@ -1686,7 +1695,8 @@ func _physics_process(delta):
 		setOptionsVisibility(false)
 	
 	
-	previewWorld.get_node("StaticBody3D").visible = previewWorld.get_node("Camera3D").current
+	if previewNode.get_node_or_null("Camera3D") != null:
+		previewWorld.get_node("StaticBody3D").visible = previewWorld.get_node("Camera3D").current
 		
 		
 	if !is_instance_valid(curTree):
@@ -1709,23 +1719,8 @@ func _physics_process(delta):
 		pEnt = result[0]
 		previewWorld.add_child(result[0])
 		threadedQueue.erase(thread)
-#	var playVisible = true
-##
-#	if playMode:
-#
-#		if paths.get_child_count() == 0:
-#			playVisible = false
-#
-#		for i in paths.get_children():
-#			if i.required == true and i.getPath().empty():
-#				playVisible = false
-#
-#
-#		$h/v1/paths/v/HBoxContainer/playButton.disabled = !playVisible
-#
 
-func importTailFlagSet():#need to call it via physics_process because if I call it in a signal it will be threaded
-	runTailImport = true
+
 
 func gameListGrabFocus():
 	gameList.grab_focus()
@@ -1893,11 +1888,8 @@ func _on_playButton_pressed():
 		return
 		
 	var gamdeModeName = all.keys()[0]
-	#var gameMode = all[gamdeModeName]
-	#var meta = {"path":all[gamdeModeName]}
-	#meta["loader"]= cur
+
 	var mode = createGameMode(gamdeModeName)
-	
 	get_tree().get_root().add_child(mode)
 	printCaches()
 	ENTG.removeEntityCacheForGame(get_tree(),curGameName)
@@ -1912,7 +1904,7 @@ func _on_playButton_pressed():
 func createGameMode(gameModeName):
 	var loaderFilePath = cur.scene_file_path
 	
-	var gameModeLoader = load(loaderFilePath).instantiate()
+	var gameModeLoader : Node = load(loaderFilePath).instantiate()
 	get_tree().get_root().add_child(gameModeLoader)
 	gameModeLoader.params = cur.params
 	gameModeLoader.name = "loader"
@@ -1924,6 +1916,8 @@ func createGameMode(gameModeName):
 	
 	var ret = ENTG.sceneBasedInstance(gameModePath,gameModeLoader.getResourceManager(),gameModeLoader.getEntityCreator())
 	gameModeLoader.reparent(ret)
+	
+	gameModeLoader.print_tree_pretty()
 	return ret
 
 func _on_close_requested():
@@ -2009,3 +2003,35 @@ func printCaches():
 		i.print_tree_pretty()
 	
 	print("---")
+
+func getCategories():
+	
+	var categories : PackedStringArray = []
+	
+	if cur.has_method("getExtraCategories"):
+		categories = cur.getExtraCategories()
+	
+	if cur.has_method("getAllFontEntries"):
+		categories.insert(0,"fonts")
+	
+	if cur.has_method("getAllThemes"):
+		categories.insert(0,"themes")
+	
+	if cur.has_method("getAllGameModes"):
+		categories.insert(0,"game modes")
+	
+	if cur.has_method("getAllTextureEntries"):
+		categories.insert(0,"textures")
+		
+	if cur.has_method("getAllModels"):
+		categories.insert(0,"models")
+	
+	if cur.has_method("getAllMapNames"):
+		categories.insert(0,"maps")
+		
+	if cur.has_method("getEntityDict"):
+		categories.insert(0,"entities")
+		
+	
+	
+	return categories

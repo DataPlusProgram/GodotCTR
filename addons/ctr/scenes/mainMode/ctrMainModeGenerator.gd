@@ -7,4 +7,3 @@ var resourceManager
 
 func initialize():
 	return
-	breakpoint

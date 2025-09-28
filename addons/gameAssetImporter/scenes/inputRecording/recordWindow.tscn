@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3 uid="uid://diht8kcgqygru"]
+
+[ext_resource type="PackedScene" uid="uid://dgbbi1pi4r8ap" path="res://addons/gameAssetImporter/scenes/inputRecording/mouseRecorder.tscn" id="1_oeoct"]
+[ext_resource type="Script" uid="uid://2lqte1txr7q4" path="res://addons/gameAssetImporter/scenes/inputRecording/record_window.gd" id="1_yejaa"]
+
+[node name="RecordWindow" type="Window"]
+oversampling_override = 1.0
+title = "Recording"
+size = Vector2i(325, 105)
+visible = false
+force_native = true
+script = ExtResource("1_yejaa")
+
+[node name="mouseRecorder" parent="." instance=ExtResource("1_oeoct")]
+
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]
+[connection signal="focus_entered" from="." to="." method="_on_focus_entered"]
+[connection signal="focus_exited" from="." to="." method="_on_focus_exited"]
+[connection signal="visibility_changed" from="." to="." method="_on_visibility_changed"]

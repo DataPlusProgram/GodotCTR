@@ -1,3 +1,4 @@
+@tool
 extends LineEdit
 
 var tree : Tree : set = treeSet

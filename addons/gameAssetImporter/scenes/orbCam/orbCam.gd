@@ -55,7 +55,7 @@ var nextTime : int
 
 @onready var yaw : Node3D = $h
 @onready var pitch : Node3D = $h/v
-@onready var cam = $h/v/Camera3D
+@onready var cam : Camera3D = $h/v/Camera3D
 
 func _ready():
 
@@ -202,8 +202,14 @@ func _process(delta):
  
 func _physics_process(delta):
 	
-	if Engine.is_editor_hint():
+	if visible == false:
 		return
+	
+	#if !cam.current:
+	#	return 
+		
+	#if Engine.is_editor_hint():
+	#	return
 	
 	sensH = SETTINGS.getSetting(get_tree(),"mouseSens")
 	sensV = SETTINGS.getSetting(get_tree(),"mouseSens")

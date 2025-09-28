@@ -63,11 +63,10 @@ func _on_button_pressed() -> void:
 
 
 func _on_addon_dir_button_pressed() -> void:
-	OS.shell_open(%addonsPath.text)	
-	pass # Replace with function body.
+	OS.shell_open(%addonsPath.text)
 
 
 func _on_sym_text_pressed() -> void:
-	var cmd = 'mklink /D "%s/ ""' % [%addonsPath.text]
+	var sample = %addonsPath.text.get_file()
+	var cmd = 'mklink /D "dest/%s" "%s/" ' % [sample,%addonsPath.text]
 	DisplayServer.clipboard_set(cmd)
-	pass # Replace with function body.

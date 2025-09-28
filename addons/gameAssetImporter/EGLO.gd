@@ -211,20 +211,34 @@ static func bytes_to_unsigned_shorts(byte_array: PackedByteArray) -> PackedInt32
 
 	return short_array
 
+static var materialCache : Dictionary[Color,StandardMaterial3D] = {}
+static var sphereMeshCache : Dictionary[float,SphereMesh]
 static func drawSphere(node : Node,pos : Vector3,color = Color.WHITE,radius = 0.1):
 	
 	
+	var shape : SphereMesh = null
 	
-	var shape : SphereMesh = SphereMesh.new()
-	shape.radius = radius/2.0
-	shape.height = radius
+	if !sphereMeshCache.has(radius):
+		shape = SphereMesh.new()
+		shape.radius = radius/2.0
+		shape.height = radius
+		sphereMeshCache[radius] = shape
+	
+	shape = sphereMeshCache[radius]
 	
 	var meshInstance = MeshInstance3D.new()
 	meshInstance.mesh = shape
 	if color != Color.WHITE:
-		meshInstance.mesh.material = StandardMaterial3D.new()
-		meshInstance.mesh.material.albedo_color = color
-		meshInstance.mesh.material.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
+		if !materialCache.has(color):
+			var mat = StandardMaterial3D.new()
+			mat.albedo_color = color
+			mat.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
+			materialCache[color] = mat
+			
+		shape.material = materialCache[color]
+
+		
+	
 	meshInstance.position = pos
 	meshInstance.name = "deubgSphere"
 	node.call_deferred("add_child",meshInstance)
@@ -461,9 +475,10 @@ static func playShrinkAnimForNode(node,endScale,time = 0.2):
 	
 	
 
-static func playGrowMaskAnimForNode(node,endScale,time = 0.2):
+static func playGrowMaskAnimForNode(node : Control,endScale,time = 0.2):
 	var fakeMask = node.duplicate()
 	fakeMask.position = node.global_position
+	#fakeMask.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	node.get_tree().get_root().add_child(fakeMask)
 	
 	if node.has_meta("animating") and node.get_meta("animating"):
@@ -788,3 +803,16 @@ static func get16AsBytes(b16) -> PackedByteArray:
 	buffer.seek(0)   
 	var bytes = buffer.get_data_array()
 	return bytes
+
+static func quickQuitInput(tree : SceneTree,combo = [KEY_CTRL,KEY_W]):
+	if Input.is_key_pressed(combo[0]):
+		if Input.is_key_pressed(combo[1]):
+			tree.quit()
+
+static func quickFullscreen(tree : SceneTree):
+	if Input.is_key_pressed(KEY_ALT):
+		if Input.is_key_pressed(KEY_ENTER):
+			tree.get_root().get_window().mode = Window.MODE_EXCLUSIVE_FULLSCREEN if (!((tree.get_root().get_window().mode == Window.MODE_EXCLUSIVE_FULLSCREEN) or (tree.get_root().get_window().mode == Window.MODE_FULLSCREEN))) else Window.MODE_WINDOWED
+			
+static func createPerformanceInfoOverlay():
+	return load("res://addons/gameAssetImporter/scenes/perfOverlay/perfInfo.tscn").instantiate()

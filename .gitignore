@@ -4,6 +4,7 @@
 *.bin
 *.csv
 *.csv.import
+*.cue
 *.dbs
 *.exe
 *.iso
@@ -16,7 +17,6 @@
 *.translation
 *.WAD
 *.wad
-*.cue
 .gitattributes
 .editorconfig
 .godot
@@ -36,11 +36,8 @@ game_imports
 /debug
 /export
 history.cfg
+
 history.txt
 icon.svg*
 project.godot
 screenshots
-/test.tscn
-/test2.tscn
-/test.gd.uid
-/test.gd
