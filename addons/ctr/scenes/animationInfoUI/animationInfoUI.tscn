@@ -1,0 +1,62 @@
+[gd_scene load_steps=2 format=3 uid="uid://1i5iyii4ggsg"]
+
+[ext_resource type="Script" uid="uid://dittcc7w0w1nx" path="res://addons/ctr/scenes/animationInfoUI/animation_info_ui.gd" id="1_evbc5"]
+
+[node name="AnimationInfoUi" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_evbc5")
+
+[node name="GridContainer" type="GridContainer" parent="."]
+layout_mode = 2
+columns = 2
+
+[node name="Label" type="Label" parent="GridContainer"]
+layout_mode = 2
+text = "Animation Name"
+
+[node name="AnimationName" type="LineEdit" parent="GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+editable = false
+
+[node name="Label2" type="Label" parent="GridContainer"]
+layout_mode = 2
+text = "Frame count"
+
+[node name="FrameCount" type="LineEdit" parent="GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+editable = false
+
+[node name="Label3" type="Label" parent="GridContainer"]
+layout_mode = 2
+text = "Is compressed"
+
+[node name="IsCompressed" type="LineEdit" parent="GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+editable = false
+
+[node name="Label4" type="Label" parent="GridContainer"]
+layout_mode = 2
+text = "First Frame Offset"
+
+[node name="FirstFrameOffset" type="LineEdit" parent="GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+editable = false
+
+[node name="Label5" type="Label" parent="GridContainer"]
+layout_mode = 2
+text = "Frame Size"
+
+[node name="FrameSize" type="LineEdit" parent="GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+editable = false

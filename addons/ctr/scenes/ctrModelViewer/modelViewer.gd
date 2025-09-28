@@ -103,8 +103,27 @@ func setModel(model):
 		
 		populateTextureLayout(textureLayouts)
 	
+	if model.has_meta("animsInfo"):
+		var animsInfo : Dictionary = model.get_meta("animsInfo")
+		populateAnimationInfo(animsInfo)
+		#breakpoint
 	
 	
+func populateAnimationInfo(animationInfo : Dictionary):
+	
+	for i in %AnimationInf.get_children():
+		i.queue_free()
+	
+	var loader = parsingFunctions["ctr"]
+	
+	for animInfo in animationInfo:
+		var aUI = load("res://addons/ctr/scenes/animationInfoUI/animationInfoUI.tscn").instantiate()
+		var fold := FoldableContainer.new()
+		fold.title = "%s" % [animInfo]
+		aUI.info = animationInfo[animInfo]
+		fold.add_child(aUI)
+		%AnimationInf.add_child(fold)
+
 	
 func populateTextureLayout(textureLayouts : Array[Dictionary]):
 	
@@ -169,12 +188,8 @@ func textureLayoutValueChanged(tlUI : Node):
 	rewriteDict[offset+10] = tlUI.get_node("%uv4x").value
 	rewriteDict[offset+11] = tlUI.get_node("%uv4y").value
 	
-	
-	
 
-	
-	
-	
+
 func textureLayoutVRMchanged(tlUI: Node):
 	var tl : Dictionary = tlUI.textureLayout
 	texturesToUpdate[tlUI] = true
@@ -341,7 +356,7 @@ func patchModelTextures(tlUI : Node):
 		var file = FileAccess.open(path,FileAccess.READ_WRITE)
 		if !bytes.is_empty():
 			imageLoader.modifyVRM(file,tl["rect"],bytes,false)
-		imageLoader.writePaletteToVRM(file,tl["pallete"],paletteBytes)
+		#imageLoader.writePaletteToVRM(file,tl["pallete"],paletteBytes) for changing palette colors currently broken
 		return
 	
 	var bigfileOffset = loader.bigfileRootOffset
@@ -352,7 +367,7 @@ func patchModelTextures(tlUI : Node):
 	loader.iso.ISOfile.seek(vrmOffset)
 	imageLoader.modifyVRM(loader.iso.ISOfile,tl["rect"],bytes,false)
 
-	imageLoader.writePaletteToVRM(loader.iso.ISOfile,tl["pallete"],paletteBytes)
+	#imageLoader.writePaletteToVRM(loader.iso.ISOfile,tl["pallete"],paletteBytes) for changing palette colors currently broken
 	
 		
 
@@ -397,6 +412,10 @@ func _on_file_dialog_big_file_selected(path:  String) -> void:
 
 
 func _on_show_wheels_checkbox_toggled(toggled_on:  bool) -> void:
+	
+	if !is_instance_valid(curModel):
+		return
+	
 	var wheels = curModel.get_node_or_null("wheels")
 	
 	if wheels == null:

@@ -513,11 +513,13 @@ func parseCTR(d : PackedByteArray,textureData:Array[Dictionary] = [],customStart
 		for animIdx in i.numAnims:
 			animOffsets.append(data.get_u32())
 		
+		if debug:
+			root.set_meta("animsInfo",{})
 		
 		
 		for animOffset in animOffsets:
 			data.seek(animOffset+4)
-			var ret = parseAnim(data,vertCount)
+			var ret = parseAnim(data,vertCount,debug,root)
 			anims[ret[0]] = [ret[1],ret[2],ret[3],ret[4]]
 		
 		if animOffsets.size() == 0:
@@ -529,7 +531,6 @@ func parseCTR(d : PackedByteArray,textureData:Array[Dictionary] = [],customStart
 		
 		if anims.size() == 0:
 			return
-		
 		
 		
 		var isFirstAnim := true
@@ -1019,7 +1020,7 @@ func createMeshFromVertices(vertices: PackedVector3Array) -> ArrayMesh:
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLE_STRIP, arrays)
 	return mesh
 
-func parseAnim(data: StreamPeerBuffer,numVerts : int):
+func parseAnim(data: StreamPeerBuffer,numVerts : int,debug : bool,debugRoot):
 	var animName = data.get_partial_data(16)[1].get_string_from_ascii()
 	var numFrames : int = data.get_16()
 	
@@ -1060,7 +1061,10 @@ func parseAnim(data: StreamPeerBuffer,numVerts : int):
 	
 	for i in numFrames:
 		readFrame(numVerts,data,(frameOffset) + (i*frameSize),frames,framePosOffsets,deltas)
-
+	
+	if debug:
+		debugRoot.get_meta("animsInfo")[animName] = {"animName":animName,"frameOffset":frameOffset,"frameSize":frameSize,"frame count":numFrames,"isCompressed":isCompressed,"deltas":deltas}
+		
 	
 	return [animName,frames,framePosOffsets,numFrames,duplicateFrames]
 
@@ -1077,10 +1081,11 @@ func readFrame(numVerts,data : StreamPeerBuffer,ptrFrame,frames : Array[PackedVe
 	var isCompressed = true
 	framePosOffsets.append(readVector(data,0.00390625))
 		
-	data.get_partial_data(16) 
-		
-	var bonk = data.get_u32()
-	var vertsOffset = bonk - 0x1C
+	data.get_partial_data(16)#unk
+	
+	var someOffset = data.get_u32()#usually 28 but not always
+
+	var vertsOffset = someOffset - 0x1C#28
 		
 	
 	data.seek(data.get_position()+vertsOffset)

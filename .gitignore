@@ -2,9 +2,9 @@
 *.autosave*
 *.backup*
 *.bin
+*.cue
 *.csv
 *.csv.import
-*.cue
 *.dbs
 *.exe
 *.iso

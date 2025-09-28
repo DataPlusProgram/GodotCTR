@@ -80,3 +80,7 @@ func _on_menu_button_save_pressed() -> void:
 	var option := EGLO.showOption(self,"Save changes to file?","Yes","No")
 	option.confirmed.connect($Node.patchModel)
 	
+
+
+func _on_show_ground_checkbox_toggled(toggled_on: bool) -> void:
+	%Ground.visible = toggled_on

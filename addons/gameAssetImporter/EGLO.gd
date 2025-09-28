@@ -442,6 +442,9 @@ static func rgbToHSV(r: float, g: float, b: float) -> Array:
 
 	return [h, s, v]
 
+static func intToHex(x : int):
+	return "0x%x" % x
+
 static func printFileAsHex(filePath : StringName):
 		var data = FileAccess.get_file_as_bytes(filePath)
 	

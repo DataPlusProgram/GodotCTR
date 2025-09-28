@@ -758,8 +758,8 @@ func moveXZ(velocity : Vector3, delta : float) -> Array[Node3D]:
 			if stepUpSuccessful:#We don't slide accros wall on this case becuase step-up has cleared it
 				continue
 		
-		#;if collisionAngle > 89:
-		#;	print(cols.get_normal(0))
+		#if collisionAngle > 89:
+		#	print(cols.get_normal(0))
 		
 		#if collisionAngle > slopeAngle and collisionAngle < 89:
 			#print(cols.get_normal(0))

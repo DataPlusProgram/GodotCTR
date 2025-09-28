@@ -120,17 +120,18 @@ initialRot = Vector2(-40, -22)
 dist = 7
 freeView = true
 
-[node name="StaticBody3D" type="StaticBody3D" parent="HBoxContainer/VSplitContainer/SubViewportContainer/SubViewport"]
+[node name="Ground" type="StaticBody3D" parent="HBoxContainer/VSplitContainer/SubViewportContainer/SubViewport"]
+unique_name_in_owner = true
 collision_layer = 3
 collision_mask = 3
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="HBoxContainer/VSplitContainer/SubViewportContainer/SubViewport/StaticBody3D"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="HBoxContainer/VSplitContainer/SubViewportContainer/SubViewport/Ground"]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
 mesh = SubResource("QuadMesh_j48ch")
 
-[node name="StaticBody3D" type="StaticBody3D" parent="HBoxContainer/VSplitContainer/SubViewportContainer/SubViewport/StaticBody3D/MeshInstance3D"]
+[node name="StaticBody3D" type="StaticBody3D" parent="HBoxContainer/VSplitContainer/SubViewportContainer/SubViewport/Ground/MeshInstance3D"]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="HBoxContainer/VSplitContainer/SubViewportContainer/SubViewport/StaticBody3D/MeshInstance3D/StaticBody3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="HBoxContainer/VSplitContainer/SubViewportContainer/SubViewport/Ground/MeshInstance3D/StaticBody3D"]
 shape = SubResource("ConcavePolygonShape3D_2h1as")
 
 [node name="CSGSphere3D" type="CSGSphere3D" parent="HBoxContainer/VSplitContainer/SubViewportContainer/SubViewport"]
@@ -220,26 +221,63 @@ unique_name_in_owner = true
 layout_mode = 2
 button_pressed = true
 
-[node name="TextureLayoutsFold" type="FoldableContainer" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer"]
+[node name="VSeparator" type="VSeparator" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+
+[node name="showWheels2" type="HBoxContainer" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/showWheels2"]
+layout_mode = 2
+text = "Show Ground"
+
+[node name="ShowGroundCheckbox" type="CheckBox" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/showWheels2"]
+layout_mode = 2
+button_pressed = true
+
+[node name="TabContainer" type="TabContainer" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+current_tab = 1
+
+[node name="TextureLayoutInfo" type="FoldableContainer" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/TabContainer"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 size_flags_vertical = 3
 title = "Texture Layouts"
+metadata/_tab_index = 0
 
-[node name="ScrollContainer" type="ScrollContainer" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/TextureLayoutsFold"]
+[node name="ScrollContainer" type="ScrollContainer" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/TabContainer/TextureLayoutInfo"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="TextureLayouts" type="VBoxContainer" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/TextureLayoutsFold/ScrollContainer"]
+[node name="TextureLayouts" type="VBoxContainer" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/TabContainer/TextureLayoutInfo/ScrollContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 12
 
+[node name="AnimationInfo" type="FoldableContainer" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/TabContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+title = "Animations"
+metadata/_tab_index = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/TabContainer/AnimationInfo"]
+layout_mode = 2
+
+[node name="AnimationInf" type="VBoxContainer" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/TabContainer/AnimationInfo/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
 [node name="FileDialog" type="FileDialog" parent="."]
 auto_translate_mode = 2
 title = "Open a File"
+auto_translate = false
 file_mode = 0
 access = 2
 filters = PackedStringArray("*.ctr")
@@ -248,6 +286,7 @@ use_native_dialog = true
 [node name="FileDialogISO" type="FileDialog" parent="."]
 auto_translate_mode = 2
 title = "Open a File"
+auto_translate = false
 file_mode = 0
 access = 2
 filters = PackedStringArray("*.bin")
@@ -256,6 +295,7 @@ use_native_dialog = true
 [node name="FileDialogBIG" type="FileDialog" parent="."]
 auto_translate_mode = 2
 title = "Open a File"
+auto_translate = false
 file_mode = 0
 access = 2
 filters = PackedStringArray("*.big")
@@ -271,6 +311,7 @@ script = ExtResource("5_ilyfh")
 [connection signal="toggled" from="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/isLoop" to="Node" method="_on_is_loop_toggled"]
 [connection signal="pressed" from="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/PlayButton" to="Node" method="_on_play_button_pressed"]
 [connection signal="toggled" from="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/showWheels/ShowWheelsCheckbox" to="Node" method="_on_show_wheels_checkbox_toggled"]
+[connection signal="toggled" from="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/showWheels2/ShowGroundCheckbox" to="." method="_on_show_ground_checkbox_toggled"]
 [connection signal="file_selected" from="FileDialog" to="Node" method="_on_file_dialog_file_selected"]
 [connection signal="file_selected" from="FileDialogISO" to="Node" method="_on_file_dialog_iso_file_selected"]
 [connection signal="file_selected" from="FileDialogBIG" to="Node" method="_on_file_dialog_big_file_selected"]

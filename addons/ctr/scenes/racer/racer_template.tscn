@@ -37,6 +37,11 @@ stepAmt = 0.8
 forwardSpeed = 1.2
 groundEmergeFix = true
 
+[node name="debug" type="Label3D" parent="movement"]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4613502, 0)
+billboard = 2
+
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 
 [node name="perfInfo" parent="." instance=ExtResource("4_bf2s0")]

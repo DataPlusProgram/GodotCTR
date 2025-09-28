@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://c86ca8w5tvtxl"]
 
-[ext_resource type="Script" uid="uid://u5ysv8f3nx2g" path="res://scenes/orbCam/orbCam.gd" id="1"]
+[ext_resource type="Script" uid="uid://u5ysv8f3nx2g" path="res://addons/gameAssetImporter/scenes/orbCam/orbCam.gd" id="1"]
 
 [node name="orbCam" type="Node3D" groups=["globalCam"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 11)
