@@ -765,7 +765,7 @@ func createMapSubModels(buffer: StreamPeerBuffer,numModels : int,textureData) ->
 		buffer.seek(0)
 		var ctrData = buffer.get_partial_data(buffer.get_size())[1]#we read the entire map buffer and use custom offset parameter to map creator
 		var model = modelLoader.parseCTR(ctrData,textureData,offset)
-		ENTG.saveNodeAsScene(model)
+		#ENTG.saveNodeAsScene(model)
 		ret[offset] = model
 		
 	return ret

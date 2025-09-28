@@ -30,6 +30,13 @@ func  _ready() -> void:
 	
 	isReady = true
 
+	if !InputMap.has_action("accelerate"):
+		EGLO.addActionAndKey("accelerate",KEY_W)
+		EGLO.addKeyToAction("accelerate",KEY_SPACE)
+	if !InputMap.has_action("backward"): EGLO.addActionAndKey("backward",KEY_S)
+	if !InputMap.has_action("jump"): EGLO.addActionAndKey("jump",KEY_J)
+	if !InputMap.has_action("turnLeft"): EGLO.addActionAndKey("turnLeft",KEY_A)
+	if !InputMap.has_action("turnRight"): EGLO.addActionAndKey("turnRight",KEY_D)
 
 func _process(delta: float) -> void:
 	

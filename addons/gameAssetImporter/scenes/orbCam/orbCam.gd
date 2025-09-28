@@ -67,19 +67,19 @@ func _ready():
 	if !InputMap.has_action("lookLeft"): InputMap.add_action("lookLeft")
 	if !InputMap.has_action("lookRight"): InputMap.add_action("lookRight")
 	
-	if !InputMap.has_action("forward"): InputMap.add_action("forward")
-	if !InputMap.has_action("backward"): InputMap.add_action("backward")
-	if !InputMap.has_action("left"): InputMap.add_action("left")
-	if !InputMap.has_action("right"): InputMap.add_action("right")
+	if !InputMap.has_action("forward"): EGLO.addActionAndKey("forward",KEY_W)
+	if !InputMap.has_action("backward"): EGLO.addActionAndKey("backward",KEY_S)
+	if !InputMap.has_action("left"): EGLO.addActionAndKey("left",KEY_A)
+	if !InputMap.has_action("right"): EGLO.addActionAndKey("right",KEY_D)
 	
-	if !InputMap.has_action("raise"): InputMap.add_action("raise")
-	if !InputMap.has_action("lower"): InputMap.add_action("lower")
-	
-	if !InputMap.has_action("raise"): InputMap.add_action("raise")
-	if !InputMap.has_action("lower"): InputMap.add_action("lower")
-	
-	if !InputMap.has_action("shiftModifier"): InputMap.add_action("shiftModifier")
-	if !InputMap.has_action("altModifier"): InputMap.add_action("altModifier")
+	if !InputMap.has_action("raise"):  
+		EGLO.addActionAndKey("raise",KEY_E)
+		EGLO.addKeyToAction("raise",KEY_SPACE)
+		
+	if !InputMap.has_action("lower"):  EGLO.addActionAndKey("lower",KEY_Q)
+
+	if !InputMap.has_action("shiftModifier"): EGLO.addActionAndKey("shiftModifier",KEY_SHIFT)
+	if !InputMap.has_action("altModifier"): EGLO.addActionAndKey("altModifier",KEY_ALT)
 	
 
 

@@ -816,3 +816,13 @@ static func quickFullscreen(tree : SceneTree):
 			
 static func createPerformanceInfoOverlay():
 	return load("res://addons/gameAssetImporter/scenes/perfOverlay/perfInfo.tscn").instantiate()
+
+static func addActionAndKey(actionName : String,keycode : Key):
+	InputMap.add_action(actionName)
+	addKeyToAction(actionName,keycode)
+	
+static func addKeyToAction(actionName : String,keycode : Key):
+	var ev = InputEventKey.new()
+	ev.physical_keycode = keycode
+	InputMap.action_add_event(actionName, ev)
+	

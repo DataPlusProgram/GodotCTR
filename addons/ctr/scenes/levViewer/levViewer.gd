@@ -584,9 +584,9 @@ func _physics_process(delta: float) -> void:
 		rewriteQuad()
 		rewriteNextFrame = false
 	
-
-	if Input.is_action_just_pressed("saveHotkey"):
-		requestOverwriteISO()
+	if InputMap.has_action("saveHotkey"):
+		if Input.is_action_just_pressed("saveHotkey"):
+			requestOverwriteISO()
 	
 
 func getModelNameToOffset():
