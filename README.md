@@ -1,4 +1,3 @@
-
 ## Installation
 Drag and drop the ```addons``` folder to the Godot project directory.   
 In the editor press: ```Project -> Project Settings -> Plugins```  and enable every plugin listed.  
@@ -8,7 +7,7 @@ Then restart the editor.
 
 To access the level editor run the scene ```levViewer.tscn```
 
-<img width="920" height="517" alt="image" src="https://github.com/user-attachments/assets/36c0fbc1-6aed-4990-81a0-1c59a6c24eb9" />
+<img width="1482" height="1009" alt="image" src="https://github.com/user-attachments/assets/f924605c-92d4-47fd-96e0-109283e659bc" />
 
 
 ## CTR Model Viewer
