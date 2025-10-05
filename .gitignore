@@ -1,6 +1,7 @@
 !addons/
 *.autosave*
 *.backup*
+*.bkp
 *.bin
 *.cue
 *.csv

@@ -1,8 +1,9 @@
-[gd_scene load_steps=15 format=3 uid="uid://bjp3rmwhull4g"]
+[gd_scene load_steps=16 format=3 uid="uid://bjp3rmwhull4g"]
 
 [ext_resource type="Script" uid="uid://bavku7isiphj0" path="res://addons/gameAssetImporter/scenes/makeUI/preview.gd" id="1_0jgmu"]
 [ext_resource type="Script" uid="uid://difxlq8i8sv2r" path="res://addons/gameAssetImporter/scenes/makeUI/sub_make_ui.gd" id="1_2xhhr"]
 [ext_resource type="Environment" uid="uid://cd5ps65wxndw1" path="res://addons/gameAssetImporter/scenes/makeUI/previewEnvironment.tres" id="2_8qlyp"]
+[ext_resource type="Script" uid="uid://bybt368kbkp1x" path="res://addons/gameAssetImporter/scenes/makeUI/game_list.gd" id="2_xkako"]
 [ext_resource type="PackedScene" uid="uid://c86ca8w5tvtxl" path="res://addons/gameAssetImporter/scenes/orbCam/orbCam.tscn" id="3_txwmj"]
 [ext_resource type="Texture2D" uid="uid://b6veuofc115wo" path="res://addons/gameAssetImporter/scenes/makeUI/texture_07.png" id="4_b5hof"]
 [ext_resource type="PackedScene" uid="uid://dylxxssl5t4na" path="res://addons/gameAssetImporter/scenes/makeUI/path.tscn" id="5_v10he"]
@@ -49,6 +50,7 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="gameList" type="ItemList" parent="v1/Panel"]
+unique_name_in_owner = true
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -58,6 +60,7 @@ item_1/text = "Doom Mod"
 item_2/text = "Hexen"
 item_3/text = "Hexen Mod"
 item_4/text = "SRBC"
+script = ExtResource("2_xkako")
 
 [node name="paths" type="Panel" parent="v1"]
 layout_mode = 2
@@ -171,6 +174,7 @@ size = Vector2i(548, 452)
 render_target_update_mode = 4
 
 [node name="CameraTopDown" parent="v3/preview/MarginContainer/SubViewportContainer/SubViewport" instance=ExtResource("3_txwmj")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.16365, 24.178751, -56.402527)
 clickOnly = true
 yawRange = Vector2(-90, 90)
 initialRot = Vector2(0, -90)
@@ -178,7 +182,7 @@ dist = 42
 freeView = true
 
 [node name="Camera3D" parent="v3/preview/MarginContainer/SubViewportContainer/SubViewport" instance=ExtResource("3_txwmj")]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 13.163649, 71.55202, 2.831221)
 clickOnly = true
 current = true
 yawRange = Vector2(-90, 90)
@@ -286,6 +290,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
+[connection signal="gui_input" from="v1/Panel/gameList" to="v1/Panel/gameList" method="_on_gui_input"]
 [connection signal="toggled" from="v3/preview/MarginContainer/soundFontPath/VBoxContainer/pauseButton" to="v3/preview/MarginContainer/soundFontPath/VBoxContainer/pauseButton" method="_on_toggled"]
 
 [editable path="v3/preview/MarginContainer/soundFontPath"]

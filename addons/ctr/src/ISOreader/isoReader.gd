@@ -111,7 +111,8 @@ func initialize(path : StringName):
 	return [fileList,isoDirectoryStucture]
 
 func close():
-	ISOfile.file.close()
+	if ISOfile.file != null:
+		ISOfile.file.close()
 	files  = {}
 	directory = {}
 	fileEntries = {}

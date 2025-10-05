@@ -100,3 +100,11 @@ func popFront():
 	
 	
 	return
+
+func isPlaying(stream :AudioStream):
+	for i : AudioStreamPlayer3D in trackedSounds:
+		if i.stream == stream:
+			return i.playing
+			
+	return false
+	

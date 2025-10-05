@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://db2gn5nk6t2yr"]
+[gd_scene load_steps=9 format=3 uid="uid://db2gn5nk6t2yr"]
 
 [ext_resource type="Script" uid="uid://cku7p1ds727r3" path="res://addons/ctr/ctrLoader.gd" id="1_iwpey"]
 [ext_resource type="Script" uid="uid://dfotlel25qklq" path="res://addons/ctr/src/imageLoader.gd" id="2_1bqu3"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://dagfr4cjep6bp" path="res://addons/ctr/src/entityLoader.gd" id="5_d6etg"]
 [ext_resource type="Script" uid="uid://n44va2feetrv" path="res://addons/ctr/resource_manager.gd" id="6_bpcg0"]
 [ext_resource type="PackedScene" uid="uid://o83ibimbxwg0" path="res://addons/ctr/src/ISOreader/isoReader.tscn" id="7_clrp5"]
+[ext_resource type="Script" uid="uid://bbrc2d4kvmpqj" path="res://addons/ctr/xdeltaParser.gd" id="8_nlfoc"]
 
 [node name="ctrLoader" type="Node"]
 script = ExtResource("1_iwpey")
@@ -27,3 +28,6 @@ script = ExtResource("5_d6etg")
 script = ExtResource("6_bpcg0")
 
 [node name="IsoReader" parent="." instance=ExtResource("7_clrp5")]
+
+[node name="xdeltaParser" type="Node" parent="."]
+script = ExtResource("8_nlfoc")

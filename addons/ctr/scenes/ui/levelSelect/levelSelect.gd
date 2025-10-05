@@ -33,6 +33,8 @@ func _physics_process(delta: float) -> void:
 func iconsThreadWrapper(mapPath : String):
 	icons = loader.mapLoader.getIconsFromMap("bigfile/levels/menu_models/data.lev")
 	
+	
+	
 func initialize():
 	
 	#icons = loader.mapLoader.getIconsFromMap("bigfile/levels/menu_models/data.lev")

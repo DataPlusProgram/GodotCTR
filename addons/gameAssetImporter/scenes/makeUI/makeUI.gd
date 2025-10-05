@@ -99,7 +99,7 @@ func _ready():
 		instantiateLoaders(loaders)
 	
 	
-	print("loader instance time:",Time.get_ticks_msec()-a)
+	print_debug("loader instance time:",Time.get_ticks_msec()-a)
 	makeHistoryFile()
 	
 	if gameList.get_selected_items().is_empty():
@@ -121,7 +121,36 @@ func _ready():
 			
 	$h.get_node("%soundFontPath").setPathText(SETTINGS.getSetting(get_tree(),"soundFont"))
 	
+	gameList.configSelected.connect(rightClickConfig)
+
+func rightClickConfig(configName):
+	var textEdit : Window = load("res://addons/gameAssetImporter/scenes/textWindow/textWindow.tscn").instantiate()
+	textEdit.title = configName
+	add_child(textEdit)
 	
+	var path = "user://"+configName+".console"
+	
+	if FileAccess.file_exists(path):
+		var content := FileAccess.get_file_as_string(path)
+		textEdit.text = content
+		
+	
+	textEdit.popup_centered()
+	textEdit.closeWindowSignal.connect(commandEditClose)
+	
+
+func commandEditClose(textEdit : TextEdit,configName : String):
+	var text := textEdit.text
+	
+	if text.is_empty():
+		return
+	
+	var path = "user://"+configName+".console"
+	
+	
+	
+	var file = FileAccess.open(path,FileAccess.WRITE)
+	file.store_string(text)
 
 func instantiateLoaders(loaders : Array[String]):
 	
@@ -252,6 +281,8 @@ func _process(delta: float) -> void:
 
 func _on_loadButton_pressed():
 	loaderInit()
+	
+	
 	if cur != null and is_instance_valid(cur):
 		if inspector == null:
 			inspector = Inspector.new()
@@ -262,6 +293,8 @@ func _on_loadButton_pressed():
 			optionsPanel.add_child(inspector)
 			
 		inspector.set_object(cur)
+		
+	
 		
 
 
@@ -1125,7 +1158,6 @@ func _on_instanceButton_pressed():
 	
 	if cat == "game modes":
 		var mode = cur.createGameMode(curEntTxt)
-		ENTG.saveNodeAsScene(mode,"res://dbg")
 		emit_signal("instance",mode,null)
 		return
 	
@@ -1895,7 +1927,19 @@ func _on_playButton_pressed():
 	ENTG.removeEntityCacheForGame(get_tree(),curGameName)
 	printCaches()
 	ENTG.createEntityCacheForGame(get_tree(),false,nameLabel.text,mode.get_node("loader"),get_tree())
-
+	
+	var configName = gameList.get_item_text(gameList.get_selected_items()[0])
+	var path = "user://"+configName+".console"
+	
+	if FileAccess.file_exists(path):
+		var cmdStr = FileAccess.get_file_as_string(path)
+		var cmds = cmdStr.split("\n")
+		
+		var console = EGLO.fetchConsole(get_tree())
+		for i in cmds:
+			if i[0] != "#":
+				console.execute(i)
+		
 	queue_free()
 	
 	
@@ -1917,7 +1961,6 @@ func createGameMode(gameModeName):
 	var ret = ENTG.sceneBasedInstance(gameModePath,gameModeLoader.getResourceManager(),gameModeLoader.getEntityCreator())
 	gameModeLoader.reparent(ret)
 	
-	gameModeLoader.print_tree_pretty()
 	return ret
 
 func _on_close_requested():
@@ -1983,7 +2026,6 @@ func _on_loader_options_pressed() -> void:
 
 
 func _on_credits_button_pressed() -> void:
-	
 	if cur == null:
 		return
 		

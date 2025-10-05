@@ -110,9 +110,13 @@ func _ready():
 	
 
 
-func dirToAcc(forward : Vector3,sideward : Vector3,inputDir : Vector3,delta):
+func dirToAcc(forward : Vector3,inputDir : Vector3,delta):
 	var ret = Vector3.ZERO
-
+	
+	var sideward := Vector3.UP.cross(forward).normalized()
+	
+	#if left != sideward:
+	#	breakpoint
 	if !par.onGround:
 		ret += forward * airSpeed * inputDir.z#air speed
 		ret += sideward * airSpeed * inputDir.x

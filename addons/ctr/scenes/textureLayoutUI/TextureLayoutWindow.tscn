@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3 uid="uid://iko3rp4qcahu"]
+
+[ext_resource type="Script" uid="uid://c4r77y2ldxfjf" path="res://addons/ctr/scenes/textureLayoutUI/texture_layout_window.gd" id="1_47rcs"]
+[ext_resource type="PackedScene" uid="uid://cggnh7bgmmefa" path="res://addons/ctr/scenes/textureLayoutUI/textureLayoutUI.tscn" id="2_f00up"]
+
+[node name="TextureLayoutWindow" type="Window"]
+oversampling_override = 1.0
+title = "Texture Layout"
+size = Vector2i(795, 415)
+script = ExtResource("1_47rcs")
+
+[node name="Panel" type="Panel" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureLayoutUi" parent="." instance=ExtResource("2_f00up")]
+
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]

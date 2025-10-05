@@ -30,9 +30,12 @@ func _physics_process(delta: float) -> void:
 	if not "inventory" in par:
 		return
 	
+
+	
 	var inventory : Dictionary = par.inventory
 	updateInventory(inventory)
 	
+
 
 func updateInventory(inventory : Dictionary):
 	

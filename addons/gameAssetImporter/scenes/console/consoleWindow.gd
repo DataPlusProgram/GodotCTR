@@ -38,3 +38,13 @@ func registerScript(script):
 		await ready
 	
 	$Console.get_node("%execute").registerScript(script)
+
+func execute(str : String):
+	
+	if !is_inside_tree():
+		await ready
+	
+	if str == "bindConsole":
+		EGLO.bindConsole(get_tree())
+	$Console.execute(str)
+	

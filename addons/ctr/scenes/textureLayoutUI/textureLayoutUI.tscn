@@ -1,6 +1,13 @@
-[gd_scene load_steps=2 format=3 uid="uid://cggnh7bgmmefa"]
+[gd_scene load_steps=4 format=3 uid="uid://cggnh7bgmmefa"]
 
 [ext_resource type="Script" uid="uid://dsqun3r28xiuv" path="res://addons/ctr/scenes/textureLayoutUI/texture_layout_ui.gd" id="1_4eajs"]
+[ext_resource type="Material" uid="uid://cbwy7kgkoemp4" path="res://addons/gameAssetImporter/scenes/perfOverlay/invertMaterial.tres" id="2_jbld6"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_jbld6"]
+font_size = 24
+font_color = Color(0.78149223, 0.85419375, 0.9992669, 1)
+outline_size = 6
+outline_color = Color(0, 0, 0, 1)
 
 [node name="TextureLayoutUi" type="VBoxContainer"]
 anchors_preset = 15
@@ -19,6 +26,21 @@ theme_override_constants/margin_top = 7
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
 layout_mode = 2
+
+[node name="TitleContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="Title" type="Label" parent="MarginContainer/VBoxContainer/TitleContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 23
+label_settings = SubResource("LabelSettings_jbld6")
+vertical_alignment = 1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -159,7 +181,32 @@ texture_filter = 1
 custom_minimum_size = Vector2(171.85, 0)
 layout_mode = 2
 size_flags_horizontal = 4
-stretch_mode = 4
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/Texture"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="dim" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/Texture/MarginContainer"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0.25882354)
+material = ExtResource("2_jbld6")
+layout_mode = 2
+size_flags_horizontal = 4
+text = "1x1"
 
 [node name="GridContainer2" type="GridContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -304,7 +351,8 @@ modulate = Color(1, 1, 1, 0.2627451)
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="ColorsLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Colors"
@@ -314,6 +362,7 @@ unique_name_in_owner = true
 layout_mode = 2
 
 [node name="HSeparator3" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
 modulate = Color(1, 1, 1, 0.2627451)
 layout_mode = 2
 theme_override_constants/separation = 10

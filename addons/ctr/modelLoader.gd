@@ -373,8 +373,7 @@ func parseCTR(d : PackedByteArray,textureData:Array[Dictionary] = [],customStart
 		specificAnimation = params["specificAnims"]
 	#if modelName != "banner":
 	#	return
-	
-	#if model
+
 	
 	root.name = modelName
 	
@@ -571,9 +570,19 @@ func parseCTR(d : PackedByteArray,textureData:Array[Dictionary] = [],customStart
 				meshInstance.mesh = mesh
 				for sIdx in surfaceInfo.size():
 					var mat = StandardMaterial3D.new()
-					mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-					mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+					
+					var noTextures = false
+					
+					if textureData.size() == 1:
+						if textureData[0].is_empty():
+							noTextures = true
+					
 					mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+					mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+					
+					if noTextures == false:
+						mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+						
 					
 					
 					
@@ -582,9 +591,6 @@ func parseCTR(d : PackedByteArray,textureData:Array[Dictionary] = [],customStart
 					for tl in textureLayouts:
 						if tl["image"] == image:
 							var mode = tl["blendingMode"]
-							#if mode != 3:
-							#	breakpoint
-					
 					
 					
 					
@@ -592,13 +598,11 @@ func parseCTR(d : PackedByteArray,textureData:Array[Dictionary] = [],customStart
 						mat.albedo_texture = ImageTexture.create_from_image(image)
 					
 					mat.vertex_color_use_as_albedo = true
-					#if OS.get_thread_caller_id() =
+					
 					parent.mutex.lock()
 					mesh.surface_set_material(sIdx,mat)
 					parent.mutex.unlock()
-					#else:
-					#	mesh.call_deferred("surface_set_material", 0, material)
-					#
+
 					continue
 				
 				meshInstance.name = "frame "+str(curFrameNumber)
@@ -620,9 +624,6 @@ func parseCTR(d : PackedByteArray,textureData:Array[Dictionary] = [],customStart
 		if root.get_node_or_null("turn/frame 10"):
 			root.get_node("turn/frame 0").visible = false
 			root.get_node("turn/frame 10").visible =true
-	
-	
-	
 	
 	
 	addWheels(root)

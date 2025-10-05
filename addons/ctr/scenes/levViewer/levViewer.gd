@@ -15,6 +15,8 @@ var curMapPath = ""
 var rewriteDict : Dictionary = {}
 var rewriteNextFrame = false
 var vertexColorEditingAllowed = false
+var levFile : FileAccess = null
+
 enum QuadFlags {
 	None = 0,
 	Invisible = 1 << 0,
@@ -42,7 +44,9 @@ func _ready() -> void:
 	
 	%MenuButtonOpen.get_popup().id_pressed.connect(openFileButtonPressed)
 	%MenuButtonMap.get_popup().id_pressed.connect(mapMenuButtonPressed)
+	%MenuButtonView.get_popup().id_pressed.connect(viewMenuButtonPressed)
 	gizmo3d.transform_changed.connect(curTransformChanged)
+	gizmo3d.mode = gizmo3d.ToolMode.MOVE# | gizmo3d.ToolMode.SCALE | gizmo3d.ToolMode.ROTATE
 	for i in flagsInspector.get_children():
 		if i is not CheckBox:
 			continue
@@ -55,8 +59,8 @@ func _ready() -> void:
 		%QuadColors.get_child(i).picker_created.connect(pickerCreated.bind(%QuadColors.get_child(i)))
 		#i.gui_input.connect(quadColorIput.bind(i))
 	
-	
-	
+	var pop : PopupMenu = %MenuButtonView.get_popup()
+	pop.hide_on_state_item_selection = false
 	updateInspector(curSelected)
 	
 
@@ -64,7 +68,6 @@ func gizmoMoved():
 	
 	if curSelected == null:
 		return
-
 	
 	
 	setInspectorPosRotValue(Vector3(curSelected.position.x,curSelected.position.y,curSelected.position.z),Vector3(curSelected.rotation.x,curSelected.rotation.y,curSelected.rotation.z))
@@ -98,7 +101,11 @@ func rewriteQuad(nop= 0):
 		return
 	
 	var t  =map.get_meta_list()
-	var baseOffset = map.get_meta("offsetInIso")
+	var baseOffset = 0
+	
+	if map.has_meta("offsetInIso"):
+		baseOffset = map.get_meta("offsetInIso")
+
 	var header =map.get_meta("header")
 	var quadBlocksOffset =map.get_meta("quadBlocksOffset")
 	var curQuadOffset = baseOffset + quadBlocksOffset + 92*curSelectedQuadIdx
@@ -106,11 +113,13 @@ func rewriteQuad(nop= 0):
 	var terrainTypeOffset =curQuadOffset + 56
 	
 	#var flagOffset = curQuadOffset + 18
-	
-	var file : ISOFileWrapper = loader.iso.ISOfile
-	file.seek(flagOffset)
-	#print("orig pos:",file.get_position() - baseOffset)
-	var t0 = file.get_16()
+	#var file : FileAccess
+	#if levFile == null:
+	#	file = loader.iso.ISOfile
+	#else:
+#		file = levFile
+#	file.seek(flagOffset)
+
 	
 	var flags = getFlagValueFromUI()
 
@@ -143,11 +152,6 @@ func rewriteQuad(nop= 0):
 	var blockInfo : Dictionary = blocksInfo[curSelectedQuadIdx]
 	
 	
-	var a = blocksInfo[curSelectedQuadIdx]["quadFlags"]
-	var b = flags
-	
-	#if blocksInfo[curSelectedQuadIdx]["quadFlags"] != flags:
-	#breakpoint
 
 	blocksInfo[curSelectedQuadIdx]["terrainFlag"]  = %TerrainType.selected
 	blocksInfo[curSelectedQuadIdx]["quadFlags"] = flags
@@ -161,10 +165,15 @@ func eraseSpheres():
 			
 	spheres = []
 
+
+func setSpawnsVis(vis : bool):
+	for i in get_children():
+		if i.has_meta("startSpawn"):
+			i.visible = vis
+
 func eraseArrows():
 	for i in get_children():
-		if i is Node3D:
-			if i.name != "gizmo":
+		if i.has_meta("startSpawn"):
 				i.queue_free()
 		
 func clickedOn(object):
@@ -284,7 +293,10 @@ func hideQuadProperties():
 	%ColorsContainer.visible = false
 	%blockIdx.visible = false
 	$%CheckPointContainer.visible = false
+	%TextuesContainer.visible = false
 	%TextureOffsetContainer.visible = false
+	%TextureLowLod.visible = false
+	
 
 
 func hideInstanceProperties():
@@ -303,6 +315,8 @@ func showQuadProperties():
 	%ColorsContainer.visible = true
 	$%CheckPointContainer.visible = true
 	%TextureOffsetContainer.visible = true
+	%TextuesContainer.visible = true
+	%TextureLowLod.visible = true
 	
 func updateInspector(object : Object):
 	
@@ -361,7 +375,7 @@ func setInspectorPosRotValue(pos : Vector3,rot : Vector3):
 	%Y.value =  pos.y / mapLoader.mapScaleFactor
 	%Z.value = pos.z / mapLoader.mapScaleFactor
 	
-	
+	return
 	%RX.value = rot.x / mapLoader.rotScaleFactor
 	%RY.value = rot.y/ mapLoader.rotScaleFactor
 	%RZ.value = rot.z/ mapLoader.rotScaleFactor
@@ -436,17 +450,18 @@ func setInspectorQuad(object : Object):
 	hideInstanceProperties()
 	
 	
-	var meta = object.get_parent().get_meta_list()
 	var blockIdx = object.get_parent().get_meta("blockIdx")
 	var blocksInfo = getMap().get_meta("blocksInfo")
 	var blockInfo : Dictionary = blocksInfo[blockIdx]
 	var textureOffsets : Array = blockInfo["textureOffsets"]
+	var lowLodTextureOffset : int = blockInfo["lowLodTextureOffset"]
 	curSelectedQuadIdx = blockIdx 
 	
 	var flags = blockInfo["quadFlags"]
 	var terrain : int = blockInfo["terrainFlag"]
 	var indices = blockInfo["indices"]
 	var colors= getMap().get_meta("colors")
+	
 	
 	
 	setFlagsUI(flags)
@@ -470,11 +485,21 @@ func setInspectorQuad(object : Object):
 	%TextureOffsetList.clear()
 	
 	for i in textureOffsets:
-		%TextureOffsetList.add_item(str(i))
+		%TextureOffsetList.add_item(EGLO.intToHex(i))
 	
-	#var terrain : int = blockInfo["terrainFlag"]
+	
 	%blockIdx.text = "Block Index: %s" % [blockIdx]
 	
+	var tlArray = getMap().get_meta("QuadTextureLayouts")[blockIdx]
+	
+	%TL1.texture = ImageTexture.create_from_image(tlArray[0]["image"])
+	%TL2.texture = ImageTexture.create_from_image(tlArray[1]["image"])
+	%TL3.texture = ImageTexture.create_from_image(tlArray[2]["image"])
+	%TL4.texture = ImageTexture.create_from_image(tlArray[3]["image"])
+	
+	var tlLow = getMap().get_meta("QuadTextureLayoutsLow")[blockIdx]
+	%TL_low.texture = ImageTexture.create_from_image(tlLow["image"])
+	%LowTexOffsetLabel.text = EGLO.intToHex(lowLodTextureOffset)
 func getVerticesFromArraymesh(origin : Vector3,mesh: Mesh) -> Array:
 	var vertices = []
 	for surface in range(mesh.get_surface_count()):
@@ -504,28 +529,29 @@ func _on_viewport_container_gui_input(event:  InputEvent) -> void:
 		#%RayCast3D.target_position = to - from  # local direction vector
 		#%RayCast3D.force_raycast_update()
 		
-	
+		
 		var results = EGLO.multiHitRaycast(%orbCam.get_world_3d(),from,to,5)
 		
 		if results.is_empty():
 			curSelected = null
 			return
-
-		var body = results[0].collider
-		
-		
-		
-		
-		var shapeIdx = results[0].shape  # Same as what RayCast3D.get_collider_shape() returns
-		
-		#var shapeIdx = %RayCast3D.get_collider_shape()
-
-		var owner_id = body.shape_find_owner(shapeIdx) # The owner ID in the collider.
-		var shape = body.shape_owner_get_owner(shapeIdx)
-		
-		
+	
+	
+		for i in results:
+			var body = i.collider
+			var shapeIdx = i.shape  # Same as what RayCast3D.get_collider_shape() returns
 			
-		clickedOn(body)
+			#var shapeIdx = %RayCast3D.get_collider_shape()
+
+			var owner_id = body.shape_find_owner(shapeIdx) # The owner ID in the collider.
+			var shape = body.shape_owner_get_owner(shapeIdx)
+			var who = shape.get_parent()
+			var who2 = shape.get_parent().get_parent()
+			var par = body.get_parent()
+			var parPar = get_parent()
+			clickedOn(body)
+			
+			return
 		
 
 func openFileButtonPressed(index):
@@ -538,13 +564,65 @@ func openFileButtonPressed(index):
 	if index == 4:
 		close()
 
+func getIsTexturesVisible():
+	var popup = %MenuButtonView.get_popup()
+	var isVisible = popup.is_item_checked(0)
+	return isVisible
 
+func getIsSpwansVisible():
+	var popup = %MenuButtonView.get_popup()
+	var isVisible = popup.is_item_checked(1)
+	return isVisible
+
+func getIsEntitiesVisible():
+	var popup = %MenuButtonView.get_popup()
+	var isVisible = popup.is_item_checked(2)
+	return isVisible
+
+func getIsTriggersVisible():
+	var popup = %MenuButtonView.get_popup()
+	var isVisible = popup.is_item_checked(3)
+	return isVisible
+	
+func getIsInvisibleVisible():
+	var popup = %MenuButtonView.get_popup()
+	var isVisible = popup.is_item_checked(4)
+	return isVisible
+
+func viewMenuButtonPressed(index):
+	var popup : PopupMenu = %MenuButtonView.get_popup()
+	
+	if index == 0:
+		var checked = !popup.is_item_checked(index)
+		popup.set_item_checked(index, checked)
+		setTexturesVisible(checked)
+	if index == 1:
+		var checked = !popup.is_item_checked(index)
+		popup.set_item_checked(index, checked)
+		setSpawnsVis(checked)
+	if index == 2:
+		var checked = !popup.is_item_checked(index)
+		popup.set_item_checked(index, checked)
+		setEntitiesVisible(checked)
+	if index == 3:
+		var checked = !popup.is_item_checked(index)
+		popup.set_item_checked(index, checked)
+		setTriggersVisible(checked)
+	if index == 4:
+		var checked = !popup.is_item_checked(index)
+		popup.set_item_checked(index, checked)
+		setInvisibleOobjectVis(checked)
+		
+	
 func mapMenuButtonPressed(index):
 	if index == 0:
 		showMapSelectList()
 		
 	if index == 1:
-		loadMap(curMapPath)
+		if !curMapPath.contains("bigfile"):
+			loadFromLev(curMapPath)
+		else:
+			loadMapBIN(curMapPath)
 
 
 func optionsButonPressed(index):
@@ -555,29 +633,52 @@ func requestOverwriteISO():
 	if lock == true:
 		return
 	lock = true
-	var dialoge := EGLO.showOption(self,"Do you wish to overwrite data in L%s" %  loader.iso.ISOfile.get_path(),"Yes","No")
+	var dialoge
+	
+	if levFile != null:
+		dialoge = EGLO.showOption(self,"Do you wish to overwrite data in %s" %  levFile.get_path(),"Yes","No")
+	else:
+		dialoge = EGLO.showOption(self,"Do you wish to overwrite data in %s" %  loader.iso.ISOfile.get_path(),"Yes","No")
 	dialoge.confirmed.connect(overwriteISO)
 
 func _on_file_dialog_file_selected(path:  String) -> void:
 	print("file dialog select")
+	
+	curMapPath = ""
+	if path.get_extension().to_lower() == "bin":
+		var err = initializeFromIso(path)
+		if err == -1:
+			return
+		showMapSelectList()
+	else:
+		loadFromLev(path)
+	
+	rewriteDict = {}
+	
+
+func loadFromLev(path):
+	
+	curMapPath = path
+	
+	if getMap() != null:
+		getMap().queue_free()
+	
+	var map = loader.mapLoader.createMapFromLev(path)
+	levFile = FileAccess.open(path,FileAccess.READ_WRITE)
+	loadMapNode(map,false)
+	
+
+func initializeFromIso(path):
 	var err = loader.initialize([path],"ctr","ctr")
-	
-	
-	
-	
 	if err == -1:
-		return
+		return err
 	
 	var iso = loader.iso
 	var volumeIdOffset = iso.volumeIdOffset
 	iso.ISOfile.seek(volumeIdOffset)
 	var volumeText : String= iso.ISOfile.get_buffer(32).get_string_from_ascii()
 	%Serial.text = volumeText.rstrip(" ")
-	
-	curMapPath = ""
-	rewriteDict = {}
-	showMapSelectList()
-	
+
 func _physics_process(delta: float) -> void:
 	
 	if rewriteNextFrame:
@@ -602,56 +703,75 @@ func getModelNameToOffset():
 func eraseLeftOvers():
 	eraseSpheres()
 	eraseArrows()
+	
 func showMapSelectList():
 	
 
-	
 	var mapNames = loader.getAllMapNames()
 	var list = %MapList
+	
+	
+	
 	for i in list.get_children():
 		if i.name != "gizmo":
 			i.queue_free()
 		
+		
+	
 	for mapName in mapNames:
 		var button = Button.new()
-		button.pressed.connect(loadMap.bind(mapName))
+		button.pressed.connect(loadMapBIN.bind(mapName))
 		button.text = mapName
 		list.add_child(button)
-		
-	$VBoxContainer.visible = true
-	$VBoxContainer/ScrollContainer/Panel2.custom_minimum_size.y = list.size.y
-	$VBoxContainer/ScrollContainer/Panel.custom_minimum_size.y = list.size.y
 	
-func loadMap(mapPath):
+	var mapListContainer = %MapListContainer
+	
+	%MapListContainer.visible = true
+	mapListContainer.get_node("Panel").custom_minimum_size.y = list.size.y
+	mapListContainer.get_node("Panel2").custom_minimum_size.y = list.size.y
+	
+func loadMapBIN(mapPath):
 	DisplayServer.window_set_title(mapPath)
-	$VBoxContainer.visible = false
-	
 	var keepPos := false
-	
-	
 	if curMapPath == mapPath:
 		keepPos = true
 	
+	curMapPath = mapPath
+	
 	if getMap() != null:
 		getMap().queue_free()
-		
-	curMapPath = mapPath
-	rewriteDict = {}
+	
+	restoreTextureDict = {}
+	var map =loader.createMap(mapPath,{"debug":true})
+	loadMapNode(map,keepPos)
+	setTexturesVisible(getIsTexturesVisible())
+	setEntitiesVisible(getIsEntitiesVisible())
+	setSpawnsVis(getIsSpwansVisible())
+	setTriggersVisible(getIsTriggersVisible())
+	setInvisibleOobjectVis(getIsInvisibleVisible())
+	
+	
+func loadMapNode(map : Node,keepPos : bool):
+	
+	%MapListContainer.visible = false
+	
+	
 	
 	eraseLeftOvers()
 	
-	var map =loader.createMap(mapPath)
 	
+	rewriteDict = {}
 	
 	%MenuButtonMap.disabled = false
 	var  m= map.get_meta_list()
-	var origin : Vector3  =map.get_meta("center")
-	
+	var origin : Vector3  = map.get_meta("center")
 	var startingPositions = map.get_meta("startPos")
 	var startingRotations = map.get_meta("startRot")
 	
 	if !keepPos:
 		%orbCam.position = startingPositions[0]
+		%orbCam.rotation = startingRotations[0]
+		%orbCam.position -=%orbCam.basis.z * 2
 	
 	
 	for i in startingPositions.size():
@@ -681,6 +801,7 @@ func loadMap(mapPath):
 	for i in modelNameToOffset:
 		%ModelSelect.add_item(i)
 		%ModelSelect.set_item_metadata(%ModelSelect.item_count-1,modelNameToOffset[i])
+	
 	
 	
 func initColorPalette(colors : PackedColorArray):
@@ -740,14 +861,26 @@ func _on_save_lev_dialog_file_selected(path:  String) -> void:
 
 
 func overwriteISO():
-	var file : ISOFileWrapper = loader.iso.ISOfile
+	var file = null
+	var baseOffset = 0
+	
+	var map = getMap()
+	
+	if levFile == null:
+		file = loader.iso.ISOfile
+		baseOffset = map.get_meta("offsetInIso")
+	else:
+		file = levFile
 	
 	#var tringToOpenFile = file.get_path()
 
-	var map = getMap()
-	var baseOffset = map.get_meta("offsetInIso")
+	
 	file.seek(baseOffset)
-	var size = map.get_meta("mapSizeInBytes")
+	var size = 0
+	if levFile != null:
+		size = file.get_length()
+	else:
+		size = map.get_meta("mapSizeInBytes")
 	var levData = file.get_buffer(size)
 	file.seek(baseOffset)
 	patchISO(levData)
@@ -829,8 +962,10 @@ func rewriteInstancePos():
 	var header = getMap().get_meta("header")
 	var instancesOffset = header["instancesOffset"]+4
 	var offset = instancesOffset +(64*instanceIdx)+ 48 
+	var baseOffset : int = 0
 	
-	var baseOffset = getMap().get_meta("offsetInIso")
+	if getMap().has_meta("offsetInIso"):
+		baseOffset = getMap().get_meta("offsetInIso")
 	
 	var buffer = StreamPeerBuffer.new()
 	var pos = int(snapped(%X.value,1))
@@ -897,7 +1032,10 @@ func rewriteVertColor(color,vertIdx,qIdx):
 	var origColor = colors[blockInfo["indices"][vertIdx]]
 	var vertsOffset =  map.get_meta("vertsOffset")
 	var offset = vertsOffset + (blockInfo["indices"][vertIdx] * 16) + 8
-	var baseOffset = map.get_meta("offsetInIso")
+	var baseOffset = 0
+	
+	if map.has_meta("offsetInIso"):
+		baseOffset = map.get_meta("offsetInIso")
 	
 	
 	#if color != origColor:
@@ -914,9 +1052,24 @@ func rewriteVertColor(color,vertIdx,qIdx):
 	
 	var color2 = loader.mapLoader.getColor(value)
 	
-	loader.iso.ISOfile.seek(offset+baseOffset)
-	var size = map.get_meta("mapSizeInBytes")
-	var levData = loader.iso.ISOfile.get_buffer(size)
+	var file  = null
+	
+	if levFile == null:
+		var t =  loader.iso.ISOfile
+		file= loader.iso.ISOfile
+	else:
+		file = levFile
+	
+	file.seek(offset+baseOffset)
+	var size : int
+	
+	if map.has_meta("mapSizeInBytes"):
+		size = map.get_meta("mapSizeInBytes")
+	else:
+		var filePath = levFile.get_path()
+		size = levFile.get_size(filePath)
+	
+	var levData = file.get_buffer(size)
 	
 	
 	var pba = [levData[offset],levData[offset+1],levData[offset+2],levData[offset+3]]
@@ -933,7 +1086,15 @@ func rewriteQuadNextFrame(nop = null):
 
 func getOrignalData(offset,size):
 	var map = getMap()
-	var baseOffset = map.get_meta("offsetInIso")
+	var baseOffset = 0
+	
+	if map.has_meta("offsetInIso"):
+		baseOffset = map.get_meta("offsetInIso")
+	
+	if levFile != null:
+		levFile.seek(baseOffset+offset)
+		return levFile.get_buffer(size)
+		
 	loader.iso.ISOfile.seek(baseOffset+offset)
 	return loader.iso.ISOfile.get_buffer(size)
 
@@ -986,11 +1147,13 @@ func reverseCheckpointOrder():
 func close():
 	if getMap() == null:
 		return
-	
+	%MenuButtonMap.disabled = true
 	getMap().queue_free()
 	loader.iso.close()
+	levFile = null
 	eraseLeftOvers()
 	rewriteDict = {}
+	curSelected = null
 
 
 func _on_button_reverse_checkpoints_pressed() -> void:
@@ -1143,3 +1306,156 @@ func curTransformChanged(mode, value : Vector3):
 		%X.value = curSelected.position.x  / mapLoader.mapScaleFactor
 		%Y.value =   curSelected.position.y / mapLoader.mapScaleFactor
 		%Z.value =  curSelected.position.z / mapLoader.mapScaleFactor
+
+
+var restoreTextureDict = {}
+
+func setEntitiesVisible(vis):
+	var map = getMap()
+	
+	if map == null:
+		return
+	
+	map.get_node("entities").visible = vis
+
+func setTexturesVisible(vis):
+	var map = getMap()
+	
+	if map == null:
+		return
+	
+	
+	if !map.has_meta("matCache"):
+		return
+	
+	var matCache : Dictionary = map.get_meta("matCache")
+	
+	if !vis:
+		for image in matCache.keys():
+			var mat = matCache[image]
+			restoreTextureDict[image] = mat.albedo_texture
+			mat.albedo_texture = null
+	else:
+		for image in matCache.keys():
+			
+			if !restoreTextureDict.has(image):
+				continue
+			var mat = matCache[image]
+			mat.albedo_texture = restoreTextureDict[image]
+			
+
+func setTriggersVisible(vis):
+	var map = getMap()
+	
+	if map == null:
+		return
+	
+	var blocksInfo = getMap().get_meta("blocksInfo")
+	
+	for i in map.get_node("geometry").get_children():
+		var blockIdx = i.get_meta("blockIdx")
+		
+		var blockInfo = blocksInfo[blockIdx]  
+		var flags = blockInfo["quadFlags"]
+		
+		if (flags & QuadFlags.InvisibleTriggers != 0):
+			i.visible = vis
+		
+func setInvisibleOobjectVis(vis):
+	var map = getMap()
+	
+	if map == null:
+		return
+	
+	var blocksInfo = getMap().get_meta("blocksInfo")
+	
+	for i in map.get_node("geometry").get_children():
+		var blockIdx = i.get_meta("blockIdx")
+		
+		var blockInfo = blocksInfo[blockIdx]  
+		var flags = blockInfo["quadFlags"]
+		
+		if (flags & QuadFlags.Invisible != 0):
+			i.visible = vis
+		
+
+
+func _on_tl_1_pressed() -> void:
+	var win : Window = load("res://addons/ctr/scenes/textureLayoutUI/TextureLayoutWindow.tscn").instantiate()
+	
+	var blockIdx = curSelected.get_parent().get_meta("blockIdx")
+	var textureLayouts = getMap().get_meta("QuadTextureLayouts")[blockIdx]
+	add_child(win)
+	var colors = loader.imageLoader.readPalleteFromTextureLayout( textureLayouts[0])
+	
+	
+	win.getTextureLayoutUI().colors = colors
+	win.setTextureLayout(textureLayouts[0])
+	
+	win.popup_centered()
+func showTLui(tl):
+	var win : Window = load("res://addons/ctr/scenes/textureLayoutUI/TextureLayoutWindow.tscn").instantiate()
+	add_child(win)
+	var colors = loader.imageLoader.readPalleteFromTextureLayout( tl)
+	win.getTextureLayoutUI().colors = colors
+	win.setTextureLayout(tl)
+	win.popup_centered()
+
+#todo compress these to a singal function
+
+
+func _on_tl_1_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			var tl = getMap().get_meta("QuadTextureLayouts")[curSelectedQuadIdx][0]
+			showTLui(tl)
+			
+
+
+func _on_tl_2_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			var tl = getMap().get_meta("QuadTextureLayouts")[curSelectedQuadIdx][1]
+			showTLui(tl)
+
+
+func _on_tl_3_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			var tl = getMap().get_meta("QuadTextureLayouts")[curSelectedQuadIdx][2]
+			showTLui(tl)
+
+
+func _on_tl_4_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			var tl = getMap().get_meta("QuadTextureLayouts")[curSelectedQuadIdx][3]
+			showTLui(tl)
+
+
+func _on_tl_low_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			#var tl = getMap().get_meta("QuadTextureLayouts")[curSelectedQuadIdx][3]
+			var tlLow = getMap().get_meta("QuadTextureLayoutsLow")[curSelectedQuadIdx]
+			showTLui(tlLow)
+
+
+func _on_button_pressed() -> void:
+	var map = getMap()
+	
+	if map == null:
+		return
+		
+	var textureLayouts : Dictionary[String,Dictionary]= map.get_meta("iconTextureLayouts")
+	var window : Window = load("res://addons/ctr/scenes/textureLayoutUI/MultiTextureLayoutWindow.tscn").instantiate()
+	
+	$/root.add_child(window)
+	
+	for i in textureLayouts.values():
+		loader.imageLoader.textureLayoutToImage(i)
+		
+	
+	window.tlList = textureLayouts
+	window.title = "Icons"
+	window.popup_centered()

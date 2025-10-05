@@ -1,8 +1,11 @@
 extends Node
 
 
-var isRecording : bool = true
+var isRecording : bool = false
 var mouseRecord = []
+
+signal mouseBufferEmptySgnal
+
 var outDir = "user://replaysOut/"
 func _process(delta: float) -> void:
 	if isRecording:
@@ -12,9 +15,10 @@ func recordMouse():
 	
 	if !isRecording:
 		return
-	
-	var curPos = get_viewport().get_mouse_position()
-	var viewport_size = get_viewport().size
+	#var viewport = get_viewport()
+	var viewport = $/root.get_viewport()
+	var curPos : Vector2i =viewport.get_mouse_position()
+	var viewport_size =viewport.size
 	
 	var isInside = Rect2(Vector2.ZERO, viewport_size).has_point(curPos)
 	
@@ -25,29 +29,39 @@ func recordMouse():
 		mouseRecord.append([Time.get_ticks_msec(),curPos,Input.get_mouse_button_mask()])
 		return
 	
+	
+	
 	var baseTime = mouseRecord[0][0]
 	var lastPos = mouseRecord.back()[1]
 	var lastInput = mouseRecord.back()[2]
 	
 	var curInput = Input.get_mouse_button_mask()
 	
+	
 	if lastPos != curPos or lastInput != curInput:
 		mouseRecord.append([Time.get_ticks_msec()-baseTime,curPos,curInput])
-		
+	
+	print(curPos)
 
 func replayMouse():
 	
 	isRecording = false
 	
+
+		
+	
 	var baseTime =  mouseRecord[0][0]
 	mouseRecord.pop_front()
 	var pInputMask = 0
-	for i in mouseRecord:
-		doRecord(i,pInputMask)
-		pInputMask = i[2]
+	for i in mouseRecord.size():
+		var record = mouseRecord[i]
+		
+		doRecord(record,pInputMask,i==mouseRecord.size()-1)
+		pInputMask = record[2]
+	
 		
 
-func doRecord(record,pIputMask):
+func doRecord(record,pIputMask,isLast):
 	var timeDiff = record[0]
 	var pos = record[1]
 	var inputMask = record[2]
@@ -57,8 +71,10 @@ func doRecord(record,pIputMask):
 	Input.warp_mouse(pos)
 	
 	#if inputMask != 0 and pIputMask !=0:
-	print(record)
 	applyMouseMask(inputMask,pIputMask,pos)
+	if isLast:
+		emit_signal("mouseBufferEmptySgnal")
+
 	
 	
 func applyMouseMask(mask: int, pInputMask: int, pos: Vector2):

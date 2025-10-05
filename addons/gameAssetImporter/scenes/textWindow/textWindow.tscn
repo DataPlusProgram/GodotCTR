@@ -1,0 +1,23 @@
+[gd_scene load_steps=2 format=3 uid="uid://dmlxv1l44f37y"]
+
+[ext_resource type="Script" uid="uid://cqrvk8h15anvk" path="res://addons/gameAssetImporter/scenes/textWindow/text_window.gd" id="1_81dkb"]
+
+[node name="TextWindow" type="Window"]
+oversampling_override = 1.0
+size = Vector2i(630, 450)
+visible = false
+force_native = true
+script = ExtResource("1_81dkb")
+
+[node name="TextEdit" type="TextEdit" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+scroll_smooth = true
+highlight_current_line = true
+
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]

@@ -19,7 +19,7 @@ var rotScaleFactor := 0.000244140625
 
 var textureCache = {}
 var paletteCache = {}
-
+var transparency = true
 enum QuadFlags {
 	None = 0,
 	Invisible = 1 << 0,
@@ -60,13 +60,39 @@ enum FaceMode {
 	DrawNone = 3
 }
 
-func createMap(mapName : String):
+func createMapFromLev(path : String):
+
+	var levBytes := FileAccess.get_file_as_bytes(path)
+	
+	
+	
+	var vrmPath = path.substr(0,path.rfind("/")) + "/data.vrm"
+	
+	if FileAccess.file_exists(vrmPath):
+		var data = FileAccess.get_file_as_bytes(vrmPath)
+		imageLoader.parseVRM2(data)
+		var textureData = imageLoader.getVRMdata(data)
+	else:
+		transparency = false
+	
+	var map = parseMap(levBytes,[{}] as Array[Dictionary])
+	return map
+
+func createMap(mapName : String, params = {}):
+	var debug : bool= false
+	
+	if params.has("debug"):
+		debug = params["debug"]
+		
+		
 	var rootOffset = parent.bigfileRootOffset
 	var mapInfo = levelFiles[mapName]
 	var mapSize = mapInfo[0]
 	var mapOffset = mapInfo[1]
 	
 	var vrmPath = mapName.substr(0,mapName.rfind("/")) + "/data.vrm"
+	
+	
 	var textureData = []
 	
 	var textureFiles = parent.textureFiles
@@ -86,12 +112,11 @@ func createMap(mapName : String):
 	
 	iso.ISOfile.seek((mapOffset * 2048) + rootOffset )
 	var data := iso.ISOfile.get_buffer(mapSize)
-	var map =  parseMap(data,textureData)
+	var map =  parseMap(data,textureData,debug)
 	
 	if debug:
 		map.set_meta("offsetInIso",(mapOffset * 2048) + rootOffset)
 		map.set_meta("mapSizeInBytes",mapSize)
-		
 		#map.set_meta("colorss",colors)
 	return map
 	
@@ -122,7 +147,7 @@ func getIconsFromMap(mapName : String):
 	var iconsOffset = data.get_u32()
 	data.seek(iconsOffset+4)
 	
-	var icons = createIcons(data)
+	var icons = createIconsTextureLayouts(data)
 	
 	var paletteCache = {}
 	
@@ -137,7 +162,7 @@ func getIconsFromMap(mapName : String):
 	return ret
 	
 
-func parseMap(d,textureData):
+func parseMap(d,textureData,isDebug = false):
 	
 	var data := StreamPeerBuffer.new()
 	data.put_data(d)
@@ -162,28 +187,33 @@ func parseMap(d,textureData):
 	
 	data.seek(0)
 	
-	
-	
-	return readScene(data,patchTable,textureData)
+	return readScene(data,patchTable,textureData,isDebug)
 
 
 
-func readScene(data : StreamPeerBuffer,patchTable : PackedInt32Array,textureData):
+
+func readScene(data : StreamPeerBuffer,patchTable : PackedInt32Array,textureData,isDebug):
 	var header =getHeader(data)
 	
 	
 	data.seek(header["meshOffset"])
-	var rootNode = readMeshInfo(data)
+	var rootNode = readMeshInfo(data,isDebug)
 	
 	
 	rootNode.set_meta("startPos",header["startingLinePositions"])
 	rootNode.set_meta("startRot", header["startingLineRotations"])
 	
+	createSkybox(header,rootNode)
+	
+
+	
 	if debug:
 		rootNode.set_meta("header",header)
 	
 	data.seek(header["iconsOffset"]+4)
-	var iconTextureLayouts = createIcons(data)
+	var iconTextureLayouts : Dictionary[String,Dictionary]= createIconsTextureLayouts(data)
+	
+	rootNode.set_meta("iconTextureLayouts",iconTextureLayouts)
 	
 	data.seek(header["modelsOffset"])
 	var modelDict : Dictionary[int,Node3D]= createMapSubModels(data,header["numModels"],textureData)
@@ -197,19 +227,24 @@ func readScene(data : StreamPeerBuffer,patchTable : PackedInt32Array,textureData
 		rootNode.set_meta("modelDict",modelDict)
 		rootNode.set_meta("instances",instanceDict)
 	
-	spawnInstances(rootNode,instanceDict,modelDict)
+	
+	var entityParent = Node3D.new()
+	entityParent.name = "entities"
+	rootNode.add_child(entityParent)
+	spawnInstances(entityParent,instanceDict,modelDict)
+	var points = parseRespawnPoints(rootNode,data,header["numRespawnPoints"],header["respawnPointsOffset"])
 	
 	return rootNode
 	
 
 
-func createIcons(data : StreamPeerBuffer):
+func createIconsTextureLayouts(data : StreamPeerBuffer) -> Dictionary[String,Dictionary]:
 	var numTextures : int = data.get_32()
 	var textureOffset : int = data.get_32()
 	var numGroups : int = data.get_32()
 	var pointerGroups : int = data.get_32()
 	
-	var textureLayouts = {}
+	var textureLayouts :  Dictionary[String,Dictionary] = {}
 	
 	for i in numTextures:
 		var ret = parent.parseIcon(data)
@@ -217,7 +252,7 @@ func createIcons(data : StreamPeerBuffer):
 	
 	return textureLayouts
 	
-func readMeshInfo(data : StreamPeerBuffer):
+func readMeshInfo(data : StreamPeerBuffer,isDebug : bool):
 	
 	var unk = data.get_u32()
 	var numQuadBlocks = data.get_u32()
@@ -228,20 +263,16 @@ func readMeshInfo(data : StreamPeerBuffer):
 	var vertsOffset2 = data.get_u32()
 	
 	var unkOffset = data.get_u32()
-	var pos = data.get_position()
-	var visDataOffset = data.get_u32()
+	var bspRoot = data.get_u32()
 	
 	
-	var numVisData = data.get_u32()
+	var numBspNodes = data.get_u32()
 	var quadBlocksOffset = data.get_u32()
 	var vertsOffset = data.get_u32()
 	
 	var verts = []
 	var colors = []
 	var morphColors = []
-
-
-	
 	
 	data.seek(vertsOffset2+4)
 	
@@ -263,18 +294,22 @@ func readMeshInfo(data : StreamPeerBuffer):
 	var r =  getQuadBlocks(data,numQuadBlocks,verts,colors)
 	var blocks = r[0]
 	var blocksColors = r[1]
-	var blockTextures = r[2]
+	var blockTextureLayouts = r[2]
 	var blockInfo = r[3]
-	
+	var textureLayoutLow = r[4]
 
 	var root = Node3D.new()
 	root.name="testMap"
-
+	var geoRoot = Node3D.new()
+	geoRoot.name = "geometry"
+	root.add_child(geoRoot)
 	if debug:
 		root.set_meta("colors",colors)
 		root.set_meta("blocksInfo",blockInfo)
 		root.set_meta("quadBlocksOffset",quadBlocksOffset2+4)
 		root.set_meta("vertsOffset",vertsOffset2+4)
+		root.set_meta("QuadTextureLayouts",blockTextureLayouts)
+		root.set_meta("QuadTextureLayoutsLow",textureLayoutLow)
 		
 	
 
@@ -285,11 +320,11 @@ func readMeshInfo(data : StreamPeerBuffer):
 		
 		var center = getBlockCenter(blocks[i])
 		var info = blockInfo[i]
-		var meshInstance : MeshInstance3D = renderBlock(blocks[i],blocksColors[i],blockTextures[i],info,center)
+		var meshInstance : MeshInstance3D = renderBlock(blocks[i],blocksColors[i],blockTextureLayouts[i],info,center)
 		
 		if debug:
 			meshInstance.set_meta("blockIdx",i)
-		
+			
 		var cols = []
 		if (info["quadFlags"] & QuadFlags.NoCollision) == 0 or debug:
 			cols = funcCreateBlockCollision(blocks[i],center)
@@ -298,7 +333,7 @@ func readMeshInfo(data : StreamPeerBuffer):
 		var body = StaticBody3D.new()
 		
 		for surfIdx in 4:
-			var image = blockTextures[i][surfIdx]["image"]
+			var image = blockTextureLayouts[i][surfIdx]["image"]
 			
 			if !matCache.has(image):
 				var m = StandardMaterial3D.new()
@@ -308,7 +343,9 @@ func readMeshInfo(data : StreamPeerBuffer):
 				if info["doubleSided"]:
 					m.cull_mode = BaseMaterial3D.CULL_DISABLED
 				
-				m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+				if transparency:
+					m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+				
 				#m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 				m.vertex_color_use_as_albedo = true
 				m.albedo_texture = ImageTexture.create_from_image(image)
@@ -319,13 +356,18 @@ func readMeshInfo(data : StreamPeerBuffer):
 		for c in cols:
 			body.add_child(c)
 		meshInstance.add_child(body)
-		root.add_child(meshInstance)
+		geoRoot.add_child(meshInstance)
 	
 	#mapDict["BB"] = mapDict["maxDim"] - mapDict["minDim"]
 	#mapDict["center"]  = mapDict["minDim"] + (mapDict["BB"]*0.5)
 
+	if isDebug:
+		root.set_meta("matCache",matCache)
+		root.set_meta("blocksTextures",blocks)
 	root.set_meta("boundingBox",maxDim-minDim)
 	root.set_meta("center",minDim+(maxDim-minDim)*0.5)
+	
+	
 	return root
 	
 func getMapDim(verts) -> Array[Vector3]:
@@ -508,6 +550,7 @@ func getQuadBlocks(data : StreamPeerBuffer,numQuadBlocks : int,verts : Array,c :
 	var blocks = []
 	var blocksInfo = []
 	var blockTextures = []
+	var blockTexturesLowLoad = []
 	var blocksColors = []
 	
 	var quadBase = data.get_position()
@@ -540,7 +583,7 @@ func getQuadBlocks(data : StreamPeerBuffer,numQuadBlocks : int,verts : Array,c :
 		var quadFlags = data.get_u16()
 		var buffer =data.get_u32()
 		var drawOrderHigh = data.get_partial_data(4)[1]
-		var textureOffsets = []
+		var textureMidOffsets = []
 		
 		
 		var drawOrderLow = buffer & 0xFF
@@ -556,7 +599,7 @@ func getQuadBlocks(data : StreamPeerBuffer,numQuadBlocks : int,verts : Array,c :
 			faceModes.append((val >> 3) & 3)
 			
 		for i in 4:
-			textureOffsets.append(data.get_32())
+			textureMidOffsets.append(data.get_32())
 			
 
 		var bbMin = readVector(data,mapScaleFactor)
@@ -587,13 +630,18 @@ func getQuadBlocks(data : StreamPeerBuffer,numQuadBlocks : int,verts : Array,c :
 		
 	
 
-		blocksInfo.append({"quadFlags":quadFlags,"drawOrderHigh":drawOrderHigh,"faceRotations":faceRotations,"faceModes":faceModes,"terrainFlag":terrainFlag,"blocksColors":colors,"indices":indices,"checkpoint id":trackPos,"doubleSided":doubleSided,"textureOffsets":textureOffsets}) # todo make this debug only
-		blockTextures.append(parseTextureLayouts(data,lowTextureOffset,textureOffsets))
+		blocksInfo.append({"quadFlags":quadFlags,"drawOrderHigh":drawOrderHigh,"faceRotations":faceRotations,"faceModes":faceModes,"terrainFlag":terrainFlag,"blocksColors":colors,"indices":indices,"checkpoint id":trackPos,"doubleSided":doubleSided,"textureOffsets":textureMidOffsets,"lowLodTextureOffset":lowTextureOffset}) # todo make this debug only
+		blockTextures.append(parseTextureLayouts(data,lowTextureOffset,textureMidOffsets))
+		
+		data.seek(lowTextureOffset+4)
+		var tl = imageLoader.parseTextureLayout(data)
+		imageLoader.textureLayoutToImage(tl,paletteCache,textureCache)
+		blockTexturesLowLoad.append(tl)
 		
 		data.seek(texturePos)
 		
 		
-	return [blocks,blocksColors,blockTextures,blocksInfo]
+	return [blocks,blocksColors,blockTextures,blocksInfo,blockTexturesLowLoad]
 	
 
 
@@ -607,9 +655,9 @@ func parseTextureLayouts(data : StreamPeerBuffer,textureLowOffset,mainTextureOff
 		
 
 		data.seek(offset+4)
-		var textureInfo = imageLoader.parseTextureLayout(data)
-		imageLoader.textureLayoutToImage(textureInfo,paletteCache,textureCache)
-		textureLayouts.append(textureInfo)
+		var textureLayout = imageLoader.parseTextureLayout(data)
+		imageLoader.textureLayoutToImage(textureLayout,paletteCache,textureCache)
+		textureLayouts.append(textureLayout)
 		
 		
 	
@@ -670,22 +718,22 @@ func getHeader(data : StreamPeerBuffer):
 	var numModels = data.get_u32()
 	var modelsOffset = data.get_u32()
 	
-	var unkPtr1 = data.get_u32()
-	var unkPtr2 = data.get_u32()
+	var bspUnkPtr1 = data.get_u32()
+	var bspUnkPtr2 = data.get_u32()
 	var instancesOffsetPointer = data.get_u32()
-	var unkPtr3 = data.get_u32()
+	var waterUnkPtr3 = data.get_u32()
 	
 	data.get_u32()
 	data.get_u32()
 	
-	var numWater = data.get_u32()
+	var numWaterVerts = data.get_u32()
 	var waterOffset = data.get_u32()
 	
 	
 	var iconsOffset = data.get_u32()
 	var iconsArrayOffset = data.get_u32()
 	
-	var environmentMapOffset = data.get_u32()
+	var environmentMapOffset = data.get_u32()#water env map only?
 	
 	
 	var gradients = []
@@ -697,7 +745,12 @@ func getHeader(data : StreamPeerBuffer):
 		var gradientFromColor = data.get_partial_data(4)
 		var gradientToColor = data.get_partial_data(4)
 		
-		gradients.append([gradientFrom,gradientTo,gradientFromColor,gradientToColor])
+		var colorTop = Color(gradientFromColor[1][0]/255.0,gradientFromColor[1][1]/255.0,gradientFromColor[1][2]/255.0)
+		var colorBottom = Color(gradientToColor[1][0]/255.0,gradientToColor[1][1]/255.0,gradientToColor[1][2]/255.0)
+		
+		gradients.append([gradientFrom,gradientTo,colorTop,colorBottom])
+	
+	
 	
 	var startingLinePositions : PackedVector3Array = []
 	var startingLineRotations  : PackedVector3Array = []
@@ -719,17 +772,69 @@ func getHeader(data : StreamPeerBuffer):
 	var unkPtr4 = data.get_u32()
 	var unkPtr5 = data.get_u32()
 
-	var lLowTexArrayOffset = data.get_u32()
+	var lowTexArrayOffset = data.get_u32()
 	
-	for i in 4:#backColor
-		data.get_8()
+	#;for i in 4:#backColor
+	#;	data.get_8()
+	
+	var clearColor := Color(data.get_8(),data.get_8(),data.get_8(),data.get_8())
 	
 	var sceneFags = data.get_u32()
 	var builtStartOffset = data.get_u32()
 	var buildEndOffset = data.get_u32()
 	var bulidTypeOffset  =data.get_u32()
 	
-	return {"meshOffset":meshInfoOffset,"modelsOffset":modelsOffset,"numModels":numModels,"startingLinePositions":startingLinePositions,"startingLineRotations":startingLineRotations,"iconsOffset":iconsOffset,"instancesOffset":instancesOffset,"numInstances":numInstances}
+	data.get_data(0x38)
+	
+	var particleColorTop =  Color(data.get_8(),data.get_8(),data.get_8(),data.get_8())
+	var particleColorBottom =  Color(data.get_8(),data.get_8(),data.get_8(),data.get_8())
+	var particleRenderMode = data.get_u32()
+	
+	var cntTrialData = data.get_u32()
+	var cntTrialDataOffset = data.get_u32()
+	
+	var cntu2 = data.get_u32()
+	var ptru2 = data.get_32()
+	
+	var numSpawnGroups = data.get_u32()
+	var spawnGroupsOffset = data.get_u32()
+	
+	var numRespawnPoints = data.get_u32()
+	var respawnPointsOffset = data.get_u32()
+	
+	
+	
+	data.get_data(16)
+	
+	var bgColorTop = Color(data.get_8(),data.get_8(),data.get_8(),data.get_8())
+	var bgColorBottom = Color(data.get_8(),data.get_8(),data.get_8(),data.get_8())
+	var gradColorTop = Color(data.get_8(),data.get_8(),data.get_8(),data.get_8())
+	var gradColorBottom= Color(data.get_8(),data.get_8(),data.get_8(),data.get_8())
+	
+	var unkptr = data.get_32()
+	var numnVcolAnim  =data.get_32()
+	var vColAnimOffset = data.get_u32()
+	
+	var numStars = data.get_16()
+	var starsSpreadBNool = data.get_16() #var fullSky = data.get_16()
+	
+	var starsSeed = data.get_16()
+	var starsDistance = data.get_16()
+	
+	#var unkAfterStars  = data.get_16()
+	#var waterLevel = data.get_16()
+	
+	var splitLine0 = data.get_16()
+	var splitLine1 = data.get_16()
+	
+	var navTableOffset = data.get_u32()
+	data.get_32()#null
+	
+	var visMemOffset = data.get_u32()
+	
+	
+	
+	return {"meshOffset":meshInfoOffset,"modelsOffset":modelsOffset,"numModels":numModels,"startingLinePositions":startingLinePositions,"startingLineRotations":startingLineRotations,"iconsOffset":iconsOffset,"instancesOffset":instancesOffset,"numInstances":numInstances,"gradients":gradients,"numRespawnPoints":numRespawnPoints,"respawnPointsOffset":respawnPointsOffset}
 	
 	
 
@@ -739,6 +844,46 @@ func readVector(buffer: StreamPeerBuffer,scale : float) -> Vector3:
 	var y = buffer.get_16() * scale
 	var z = buffer.get_16() * scale
 	return Vector3(x,y,z)
+
+func createGradient(gradients):
+	#each gradient is 32 tall meaning final height is 128 (32*3)
+	var image = Image.create_empty(1,1280*2,false,Image.Format.FORMAT_RGB8)
+	var colors = []
+	for i in gradients:
+		colors.append(i[2])
+		colors.append(i[3])
+	
+	colors.insert(0,colors[0])
+	colors.insert(0,colors[0])
+	
+	fillImageWithGradient(image,colors)
+	image.save_png("res://dbg/grad.png")
+	return image
+
+func fillImageWithGradient(img: Image, color_pairs: Array) -> void:
+	var width = img.get_width()
+	var height = img.get_height()
+	var num_sections = color_pairs.size() / 2
+	var section_height = height / num_sections
+
+	for section in range(num_sections):
+		var start_color: Color = color_pairs[section * 2]
+		var end_color: Color = color_pairs[section * 2 + 1]
+
+		for y in range(section_height):
+			var t = float(y) / float(section_height - 1)  # 0 → 1
+			var row_color = start_color.lerp(end_color, t)
+
+			for x in range(width):
+				img.set_pixel(x, section * section_height + y, row_color)
+
+	# If height isn't perfectly divisible, fill any leftover rows with the last color
+	var remaining = height - (section_height * num_sections)
+	if remaining > 0:
+		var last_color = color_pairs[-1]
+		for y in range(remaining):
+			for x in range(width):
+				img.set_pixel(x, height - remaining + y, last_color)
 
 
 func createMapSubModels(buffer: StreamPeerBuffer,numModels : int,textureData) -> Dictionary[int,Node3D]:
@@ -837,10 +982,10 @@ func spawnInstances(rootNode : Node3D,instanceDicts,modelDict : Dictionary[int,N
 	for i in instanceDicts:
 		var iName = i["name"]
 		var pos = i["pos"]
-		var rot = i["rot"]
+		var rot = i["rot"]# * rotScaleFactor
 		
-		
-		rot.y = ((rot.y*TAU) - (PI/2.0)) * rotScaleFactor
+		#rot.y = ((rot.y*TAU) - (PI/2.0))
+		#rot.y = ((rot.y*TAU) - (PI/2.0)) * rotScaleFactor
 		
 		rootNode.add_child(createDebugInstance(iName,pos,rot,modelDict,i["modelOffset"],count))
 		count += 1
@@ -879,5 +1024,78 @@ func createDebugInstance(iName : String,pos : Vector3, rot : Vector3,modelDict,m
 	staticBody.add_child(colShape)
 	model.add_child(staticBody)
 	return model
+	
+	
+func createSkybox(header, rootNode: Node):
+	var gradImage = createGradient(header["gradients"])
+	var bb = rootNode.get_meta("boundingBox")
+	var center = rootNode.get_meta("center")
+
+	var meshInstance = MeshInstance3D.new()
+	var mesh = SphereMesh.new()
+	
+	
+	var largestComponent = max(bb.x,bb.y,bb.z )
+	mesh.radial_segments = 64
+	mesh.rings = 32
+	mesh.radius = largestComponent*2.0 
+	mesh.height = largestComponent*2.0
+	meshInstance.mesh = mesh
+	
+	
+	
+	# Make material
+	var mat = StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED # render inside of sphere
+	mat.albedo_texture = ImageTexture.create_from_image(gradImage)
+	
+	meshInstance.material_override = mat
+	
+	# Move sphere to scene center
+	meshInstance.position = center
+	
+	#meshInstance.position.y -= bb.y/2.0
+	rootNode.add_child(meshInstance)
+	return meshInstance
+	
+	
+func parseRespawnPoints(rootNode : Node,data : StreamPeerBuffer,numRespawnPoints : int,respawnPointsOffset : int):
+	
+	var parsed : Array[Array]
+	var origPos = data.get_position()
+	data.seek(respawnPointsOffset)
+	
+	for i in numRespawnPoints:
+		var position = readVector(data,mapScaleFactor)
+		var distanceToFinish = data.get_16()
+		var next = data.get_8()
+		var left = data.get_8()
+		var prev = data.get_8()
+		var right = data.get_8()
+
+			 
+		parsed.append([position,distanceToFinish,next,left,prev,right])
+
+	#for i in parsed:
+		#var pos = i[0]
+		#var sphere := CSGBox3D.new()
+		#sphere.position = pos
+		#rootNode.add_child(sphere)
+	data.seek(origPos)
+	
+func readNavPath(buffer : StreamPeerBuffer):
+	var version = buffer.get_16()
+	
+func readNavFrame(buffer : StreamPeerBuffer):
+	var pos = readVector(buffer,mapScaleFactor)
+	var angle =  readVector(buffer,1)
+	var unk1 = buffer.get_8()
+	var unk2 = buffer.get_8()
+	var unk3 = buffer.get_16()
+	var unk4 = buffer.get_16()
+	var unk5 = buffer.get_8()
+	var unk6 = buffer.get_8()
+
 	
 	

@@ -211,7 +211,7 @@ func getAllModels():
 
 
 func createMap(mapName,params : Dictionary = {},parentCache : Node = null):
-	return mapLoader.createMap(mapName)
+	return mapLoader.createMap(mapName,params)
 
 func createModelThreaded(modelName : String,specificAnims,resultStorage):
 	resourceManager.createModelThreaded(modelName,resultStorage)
@@ -229,12 +229,6 @@ func getConfigs():
 
 func _ready() -> void:
 	
-	
-	return
-	var file = FileAccess.open("res://CTRS/JakDax_pack.xdelta",FileAccess.READ)
-	var header = file.get_buffer(4)
-	var hdrIndicator = file.get_8()
-	var secondaryCompressorId = file.get_8()
 	return
 	
 	

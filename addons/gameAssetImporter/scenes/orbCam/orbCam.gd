@@ -128,13 +128,13 @@ func _input(event):
 			
 
 			
+func setYaw(angleRad):
+	rotH = (rad_to_deg(angleRad) - initialRot.x) / sensH
 
-
+func setPitch(angleRad):
+	rotV = (rad_to_deg(angleRad) - initialRot.y) / sensV
 
 func fovChange(ifov):
-	
-
-	
 	if ifov != null and cam != null:
 		cam.fov = ifov
 
@@ -164,6 +164,10 @@ func _process(delta):
 	for i in rotationChildrenXprocess:
 		if is_instance_valid(i):
 			i.rotation.x = pitch.rotation.x
+			
+	for i in rotationChildrenYprocess:
+		if is_instance_valid(i):
+			i.rotation.y = yaw.rotation.y
 			#
 	
 	var speedAdjust = max(1,dist)
@@ -205,11 +209,13 @@ func _physics_process(delta):
 	if visible == false:
 		return
 	
-	#if !cam.current:
-	#	return 
+	cam.current = current
+	
+	if !cam.current:
+		return 
 		
-	#if Engine.is_editor_hint():
-	#	return
+	if Engine.is_editor_hint():
+		return
 	
 	sensH = SETTINGS.getSetting(get_tree(),"mouseSens")
 	sensV = SETTINGS.getSetting(get_tree(),"mouseSens")
@@ -219,7 +225,7 @@ func _physics_process(delta):
 	pitch.rotation_degrees.x = (rotV * sensV) + initialRot.y
 	
 	cam.position.z = dist
-	cam.current = current
+	
 	
 	
 	for i in facingDirChildren:

@@ -99,4 +99,5 @@ func _on_visibility_changed():
 		%input.text = ""
 		%input.grab_focus()
 	
-	
+func execute(str: String):
+	%execute.execute(str)

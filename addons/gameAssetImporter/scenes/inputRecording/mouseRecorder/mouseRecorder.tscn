@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dgbbi1pi4r8ap"]
+
+[ext_resource type="Script" uid="uid://djo5c0v5a6g4p" path="res://addons/gameAssetImporter/scenes/inputRecording/mouseRecorder/mouseRecorder.gd" id="1_k36b2"]
+
+[node name="mouseRecorder" type="Node"]
+script = ExtResource("1_k36b2")

@@ -147,10 +147,7 @@ func populateTextureLayout(textureLayouts : Array[Dictionary]):
 		
 		if tl.has("image"):
 			image = tl["image"]
-			var colors = loader.imageLoader.readPalleteFromTextureLayout(tl)
-			
-			tlUI.colors = colors
-			tlUI.get_node("%Texture").texture = ImageTexture.create_from_image(image)
+			tlUI.colors = loader.imageLoader.readPalleteFromTextureLayout(tl)
 			tlUI.vrmChagnedSignal.connect(textureLayoutVRMchanged.bind(tlUI))
 			tlUI.paletteChangedSignal.connect(textureLayoutPaletteChanged.bind(tlUI))
 		

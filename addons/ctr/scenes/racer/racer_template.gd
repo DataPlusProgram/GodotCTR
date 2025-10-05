@@ -55,7 +55,7 @@ func _physics_process(delta: float) -> void:
 		
 	var groundNormal = $movement.groundNormal
 	
-	print($movement.onGround)
+	
 	
 	if  groundNormal.length() != 0 and groundNormal.length() != INF:
 		var angle = acos(groundNormal.dot(Vector3.UP))

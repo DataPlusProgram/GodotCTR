@@ -1,9 +1,11 @@
-[gd_scene load_steps=8 format=3 uid="uid://cy5ev7l3hdosn"]
+[gd_scene load_steps=10 format=3 uid="uid://cy5ev7l3hdosn"]
 
 [ext_resource type="Script" uid="uid://cot60mnxp5kl3" path="res://addons/ctr/scenes/levViewer/levViewer.gd" id="1_qih2i"]
 [ext_resource type="PackedScene" uid="uid://c86ca8w5tvtxl" path="res://addons/gameAssetImporter/scenes/orbCam/orbCam.tscn" id="1_vfvc6"]
 [ext_resource type="PackedScene" uid="uid://db2gn5nk6t2yr" path="res://addons/ctr/CTR_Loader.tscn" id="3_sth5e"]
+[ext_resource type="Texture2D" uid="uid://b6veuofc115wo" path="res://addons/gameAssetImporter/scenes/makeUI/texture_07.png" id="4_8vh3b"]
 [ext_resource type="Script" uid="uid://e3f1ox6y6cvg" path="res://addons/gameAssetImporter/scenes/Gizmo3DScript/gizmo3D.gd" id="4_feltq"]
+[ext_resource type="Script" uid="uid://ls7hd8l67488" path="res://addons/ctr/scenes/levViewer/line_edit.gd" id="6_8vh3b"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_vfvc6"]
 sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
@@ -69,13 +71,13 @@ clip_contents = true
 layout_mode = 2
 text = "File"
 item_count = 5
-popup/item_0/text = "BIN"
+popup/item_0/text = "Open"
 popup/item_0/id = 0
 popup/item_1/id = 1
 popup/item_1/separator = true
-popup/item_2/text = "Save to Lev"
+popup/item_2/text = "Save to new Lev"
 popup/item_2/id = 2
-popup/item_3/text = "Overwrite current ISO"
+popup/item_3/text = "Write changes to File"
 popup/item_3/id = 3
 popup/item_4/text = "Close"
 popup/item_4/id = 4
@@ -98,6 +100,32 @@ clip_contents = true
 layout_mode = 2
 text = "Options
 "
+
+[node name="MenuButtonView" type="MenuButton" parent="VBoxContainer2/MenuBar/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "View"
+item_count = 5
+popup/item_0/text = "Textures"
+popup/item_0/checkable = 1
+popup/item_0/checked = true
+popup/item_0/id = 0
+popup/item_1/text = "Spawns"
+popup/item_1/checkable = 1
+popup/item_1/checked = true
+popup/item_1/id = 1
+popup/item_2/text = "Instances"
+popup/item_2/checkable = 1
+popup/item_2/checked = true
+popup/item_2/id = 2
+popup/item_3/text = "Invisible Triggers"
+popup/item_3/checkable = 1
+popup/item_3/checked = true
+popup/item_3/id = 3
+popup/item_4/text = "Show Invisible"
+popup/item_4/checkable = 1
+popup/item_4/checked = true
+popup/item_4/id = 4
 
 [node name="HSplitContainer" type="HSplitContainer" parent="VBoxContainer2"]
 layout_mode = 2
@@ -124,6 +152,7 @@ shadow_enabled = true
 
 [node name="orbCam" parent="VBoxContainer2/HSplitContainer/ViewportContainer/SubViewport" instance=ExtResource("1_vfvc6")]
 unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -80.21791, 124.036896, 1056.7561)
 zoomMax = 0.0
 clickOnly = true
 MMB_moves = true
@@ -152,6 +181,7 @@ layout_mode = 2
 
 [node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer"]
 layout_mode = 2
+scroll_vertical = 100
 horizontal_scroll_mode = 0
 
 [node name="Inspector" type="VBoxContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer"]
@@ -164,6 +194,7 @@ size_flags_vertical = 3
 [node name="blockIdx" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector"]
 unique_name_in_owner = true
 layout_mode = 2
+horizontal_alignment = 1
 
 [node name="instanceName" type="LineEdit" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector"]
 unique_name_in_owner = true
@@ -185,7 +216,7 @@ layout_mode = 2
 alignment = 1
 
 [node name="Label" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/PositionContainer/HBoxContainer"]
-modulate = Color(1, 0.50217897, 0.43651646, 1)
+modulate = Color(1, 0.502179, 0.436516, 1)
 layout_mode = 2
 text = "x"
 
@@ -197,7 +228,7 @@ max_value = 999999.0
 custom_arrow_step = 10.0
 
 [node name="Label2" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/PositionContainer/HBoxContainer"]
-modulate = Color(0.487476, 0.9999998, 0.7577463, 1)
+modulate = Color(0.487476, 1, 0.757746, 1)
 layout_mode = 2
 text = "y"
 
@@ -208,7 +239,7 @@ min_value = -99999.0
 max_value = 99999.0
 
 [node name="Label3" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/PositionContainer/HBoxContainer"]
-modulate = Color(0.61027527, 0.6553902, 1, 1)
+modulate = Color(0.610275, 0.65539, 1, 1)
 layout_mode = 2
 text = "z"
 
@@ -233,7 +264,7 @@ layout_mode = 2
 alignment = 1
 
 [node name="Label" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/RotationContainer/HBoxContainer"]
-modulate = Color(1, 0.50217897, 0.43651646, 1)
+modulate = Color(1, 0.502179, 0.436516, 1)
 layout_mode = 2
 text = "x"
 
@@ -242,9 +273,10 @@ unique_name_in_owner = true
 layout_mode = 2
 min_value = -99999.0
 max_value = 999999.0
+editable = false
 
 [node name="Label2" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/RotationContainer/HBoxContainer"]
-modulate = Color(0.487476, 0.9999998, 0.7577463, 1)
+modulate = Color(0.487476, 1, 0.757746, 1)
 layout_mode = 2
 text = "y"
 
@@ -253,9 +285,10 @@ unique_name_in_owner = true
 layout_mode = 2
 min_value = -99999.0
 max_value = 99999.0
+editable = false
 
 [node name="Label3" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/RotationContainer/HBoxContainer"]
-modulate = Color(0.61027527, 0.6553902, 1, 1)
+modulate = Color(0.610275, 0.65539, 1, 1)
 layout_mode = 2
 text = "z"
 
@@ -264,6 +297,7 @@ unique_name_in_owner = true
 layout_mode = 2
 min_value = -999999.0
 max_value = 99999.0
+editable = false
 
 [node name="ModelContainer" type="HBoxContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector"]
 unique_name_in_owner = true
@@ -582,31 +616,114 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 text = "1"
 
+[node name="TextuesContainer" type="FoldableContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector"]
+unique_name_in_owner = true
+layout_mode = 2
+title = "Textures"
+
+[node name="Textures" type="GridContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/TextuesContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+columns = 2
+
+[node name="TL1" type="TextureRect" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/TextuesContainer/Textures"]
+unique_name_in_owner = true
+texture_filter = 1
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 10
+texture = ExtResource("4_8vh3b")
+expand_mode = 1
+stretch_mode = 4
+
+[node name="TL2" type="TextureRect" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/TextuesContainer/Textures"]
+unique_name_in_owner = true
+texture_filter = 1
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 2
+texture = ExtResource("4_8vh3b")
+expand_mode = 1
+stretch_mode = 4
+
+[node name="TL3" type="TextureRect" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/TextuesContainer/Textures"]
+unique_name_in_owner = true
+texture_filter = 1
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 10
+texture = ExtResource("4_8vh3b")
+expand_mode = 1
+stretch_mode = 4
+
+[node name="TL4" type="TextureRect" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/TextuesContainer/Textures"]
+unique_name_in_owner = true
+texture_filter = 1
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 2
+texture = ExtResource("4_8vh3b")
+expand_mode = 1
+stretch_mode = 4
+
 [node name="TextureOffsetContainer" type="FoldableContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector"]
 unique_name_in_owner = true
 layout_mode = 2
-folded = true
 title = "Texture Offsets"
 
 [node name="TextureOffsetList" type="ItemList" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/TextureOffsetContainer"]
 unique_name_in_owner = true
-visible = false
 layout_mode = 2
 theme_override_constants/h_separation = 14
 auto_height = true
 max_columns = 4
+
+[node name="TextureLowLod" type="FoldableContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector"]
+unique_name_in_owner = true
+layout_mode = 2
+title = "Texture Low LOD"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/TextureLowLod"]
+layout_mode = 2
+
+[node name="TL_low" type="TextureRect" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/TextureLowLod/VBoxContainer"]
+unique_name_in_owner = true
+texture_filter = 1
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture = ExtResource("4_8vh3b")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TLL_offset" type="HBoxContainer" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/TextureLowLod/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/TextureLowLod/VBoxContainer/TLL_offset"]
+layout_mode = 2
+text = "Texture layout offset:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LowTexOffsetLabel" type="LineEdit" parent="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/TextureLowLod/VBoxContainer/TLL_offset"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 25.215)
+layout_mode = 2
+size_flags_horizontal = 3
+editable = false
 
 [node name="FileDialog" type="FileDialog" parent="."]
 auto_translate_mode = 2
 title = "Open a File"
 file_mode = 0
 access = 2
-filters = PackedStringArray("*.bin")
+filters = PackedStringArray("*.bin", "*.lev")
 use_native_dialog = true
 
 [node name="ctrLoader" parent="." instance=ExtResource("3_sth5e")]
 
-[node name="VBoxContainer" type="Control" parent="."]
+[node name="MapListContainer" type="Control" parent="."]
+unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(490.005, 0)
 layout_mode = 1
@@ -614,14 +731,30 @@ anchors_preset = 13
 anchor_left = 0.5
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -185.0
+offset_left = -245.35501
 offset_top = -1.0
-offset_right = 184.295
+offset_right = 244.65002
 offset_bottom = -1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer"]
+[node name="Panel2" type="Panel" parent="MapListContainer"]
+modulate = Color(0, 0, 0, 1)
+layout_mode = 0
+offset_right = 490.00504
+offset_bottom = 648.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Panel" type="Panel" parent="MapListContainer"]
+modulate = Color(0, 0, 0, 1)
+layout_mode = 0
+offset_right = 490.00504
+offset_bottom = 648.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MapListContainer"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -629,19 +762,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Panel2" type="Panel" parent="VBoxContainer/ScrollContainer"]
-modulate = Color(0, 0, 0, 1)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="Panel" type="Panel" parent="VBoxContainer/ScrollContainer"]
-modulate = Color(0, 0, 0, 1)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/ScrollContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="MapListContainer/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -650,20 +771,24 @@ theme_override_constants/margin_top = 18
 theme_override_constants/margin_right = 15
 theme_override_constants/margin_bottom = 8
 
-[node name="MapList" type="VBoxContainer" parent="VBoxContainer/ScrollContainer/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MapListContainer/ScrollContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="LineEdit" type="LineEdit" parent="MapListContainer/ScrollContainer/MarginContainer/VBoxContainer"]
+self_modulate = Color(2.107, 2.107, 2.107, 1)
+layout_mode = 2
+size_flags_vertical = 0
+script = ExtResource("6_8vh3b")
+
+[node name="HSeparator" type="HSeparator" parent="MapListContainer/ScrollContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="MapList" type="VBoxContainer" parent="MapListContainer/ScrollContainer/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 11
-
-[node name="Button" type="Button" parent="VBoxContainer/ScrollContainer/MarginContainer/MapList"]
-layout_mode = 2
-
-[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
 
 [node name="SaveLevDialog" type="FileDialog" parent="."]
 auto_translate_mode = 2
@@ -683,7 +808,7 @@ layout_mode = 2
 [node name="Window" type="Window" parent="."]
 auto_translate_mode = 2
 oversampling_override = 1.0
-position = Vector2i(235, 55)
+position = Vector2i(235, 54)
 size = Vector2i(815, 515)
 visible = false
 
@@ -734,36 +859,30 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/v_separation = 15
 
-[node name="HBoxContainer" type="HBoxContainer" parent="OptionsParent/MarginContainer/GridContainer"]
+[node name="Button" type="Button" parent="OptionsParent/MarginContainer/GridContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-
-[node name="Label" type="Label" parent="OptionsParent/MarginContainer/GridContainer/HBoxContainer"]
-layout_mode = 2
-text = "Allow editing vertex color"
-
-[node name="VertexColorAllow" type="CheckBox" parent="OptionsParent/MarginContainer/GridContainer/HBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
+text = "View icons in Lev"
 
 [node name="ButtonReverseCheckpoints" type="Button" parent="OptionsParent/MarginContainer/GridContainer"]
 layout_mode = 2
 text = "Reverse Checkpoint Order"
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="OptionsParent/MarginContainer/GridContainer"]
+[node name="serialContainer" type="HBoxContainer" parent="OptionsParent/MarginContainer/GridContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 
-[node name="Label" type="Label" parent="OptionsParent/MarginContainer/GridContainer/HBoxContainer2"]
+[node name="Label" type="Label" parent="OptionsParent/MarginContainer/GridContainer/serialContainer"]
 layout_mode = 2
 text = "Serial"
 
-[node name="Serial" type="LineEdit" parent="OptionsParent/MarginContainer/GridContainer/HBoxContainer2"]
+[node name="Serial" type="LineEdit" parent="OptionsParent/MarginContainer/GridContainer/serialContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(151.285, 0)
 layout_mode = 2
 max_length = 10
 
-[node name="SerialRewriteButton" type="Button" parent="OptionsParent/MarginContainer/GridContainer/HBoxContainer2"]
+[node name="SerialRewriteButton" type="Button" parent="OptionsParent/MarginContainer/GridContainer/serialContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Write Serial"
@@ -780,9 +899,16 @@ text = "Write Serial"
 [connection signal="item_selected" from="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/ModelContainer/ModelSelect" to="." method="_on_model_select_item_selected"]
 [connection signal="value_changed" from="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/CheckPointContainer/CheckPointIdx" to="." method="_on_check_point_idx_value_changed"]
 [connection signal="item_selected" from="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/TerrainTypeContainer/HBoxContainer/TerrainType" to="." method="_on_terrain_type_item_selected"]
+[connection signal="gui_input" from="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/TextuesContainer/Textures/TL1" to="." method="_on_tl_1_gui_input"]
+[connection signal="gui_input" from="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/TextuesContainer/Textures/TL2" to="." method="_on_tl_2_gui_input"]
+[connection signal="gui_input" from="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/TextuesContainer/Textures/TL3" to="." method="_on_tl_3_gui_input"]
+[connection signal="gui_input" from="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/TextuesContainer/Textures/TL4" to="." method="_on_tl_4_gui_input"]
+[connection signal="gui_input" from="VBoxContainer2/HSplitContainer/MarginContainer/ScrollContainer/Inspector/TextureLowLod/VBoxContainer/TL_low" to="." method="_on_tl_low_gui_input"]
 [connection signal="file_selected" from="FileDialog" to="." method="_on_file_dialog_file_selected"]
+[connection signal="hidden" from="MapListContainer/ScrollContainer/MarginContainer/VBoxContainer/LineEdit" to="MapListContainer/ScrollContainer/MarginContainer/VBoxContainer/LineEdit" method="_on_hidden"]
+[connection signal="text_changed" from="MapListContainer/ScrollContainer/MarginContainer/VBoxContainer/LineEdit" to="MapListContainer/ScrollContainer/MarginContainer/VBoxContainer/LineEdit" method="_on_text_changed"]
 [connection signal="file_selected" from="SaveLevDialog" to="." method="_on_save_lev_dialog_file_selected"]
 [connection signal="close_requested" from="OptionsParent" to="." method="_on_options_parent_close_requested"]
-[connection signal="toggled" from="OptionsParent/MarginContainer/GridContainer/HBoxContainer/VertexColorAllow" to="." method="_on_vertex_color_allow_toggled"]
+[connection signal="pressed" from="OptionsParent/MarginContainer/GridContainer/Button" to="." method="_on_button_pressed"]
 [connection signal="pressed" from="OptionsParent/MarginContainer/GridContainer/ButtonReverseCheckpoints" to="." method="_on_button_reverse_checkpoints_pressed"]
-[connection signal="pressed" from="OptionsParent/MarginContainer/GridContainer/HBoxContainer2/SerialRewriteButton" to="." method="_on_serial_rewrite_button_pressed"]
+[connection signal="pressed" from="OptionsParent/MarginContainer/GridContainer/serialContainer/SerialRewriteButton" to="." method="_on_serial_rewrite_button_pressed"]

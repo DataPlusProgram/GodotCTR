@@ -9,8 +9,10 @@ var painterWindow : Window = null
 var colors : PackedColorArray : set = setColors
 var textureLayout : Dictionary = {} : set = setTextureLayout
 
+var title : String = "" : set = setTitle
 
 func setTextureLayout(tl : Dictionary):
+	
 	textureLayout = tl
 	
 	var uvs = tl["uv"]
@@ -62,6 +64,9 @@ func setTextureLayout(tl : Dictionary):
 	else:
 		%bpp.value = 16
 	
+	if textureLayout.has("image"):
+		%Texture.texture = ImageTexture.create_from_image(textureLayout["image"])
+		%dim.text = "%sx%s" % [textureLayout["image"].get_size().x,textureLayout["image"].get_size().y]
 	
 	
 
@@ -80,11 +85,7 @@ func _ready():
 	%palY.value_changed.connect(valueChanged)
 	
 	
-	
-	
-	
-	
-	
+
 func valueChanged(value : int):
 	emit_signal("valueChangedSignal")
 
@@ -99,6 +100,16 @@ func getBytes() -> PackedByteArray:
 func setColors(cols : PackedColorArray):
 	
 	colors = cols
+	
+	if colors.is_empty():
+		%ColorsLabel.visible = false
+		%PaletteContainer.visible = false
+		%HSeparator3.visible = false
+		return
+		
+	%ColorsLabel.visible = true
+	%PaletteContainer.visible = true
+	%HSeparator3.visible = true
 	
 	for i in colors:
 		#var colorRect:= ColorRect.new()
@@ -129,6 +140,10 @@ func _on_texture_gui_input(event:  InputEvent) -> void:
 		
 	
 	var vrmPath : String =  %VRMpath.text
+	
+	
+	if %Texture.texture == null:
+		return
 	var image : Image = %Texture.texture.get_image()
 	
 	if vrmPath.is_empty():
@@ -159,3 +174,12 @@ func painterWindowClose():
 
 func tlPaletteColorChanged(color : Color):
 	emit_signal("paletteChangedSignal")
+
+func setTitle(titleStr : String):
+	title = titleStr
+	
+	if title.is_empty():
+		%TitleContainer.visible = false
+	else:
+		%Title.text = titleStr
+		%TitleContainer.visible = true

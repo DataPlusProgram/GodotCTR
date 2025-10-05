@@ -111,7 +111,7 @@ render_target_update_mode = 4
 
 [node name="Camera3D" parent="HBoxContainer/VSplitContainer/SubViewportContainer/SubViewport" instance=ExtResource("3_havml")]
 unique_name_in_owner = true
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 333.0478, 774.9264, 258.04358)
 clickOnly = true
 MMB_moves = true
 current = true
@@ -238,11 +238,10 @@ button_pressed = true
 [node name="TabContainer" type="TabContainer" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
-current_tab = 1
+current_tab = 0
 
 [node name="TextureLayoutInfo" type="FoldableContainer" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/TabContainer"]
 unique_name_in_owner = true
-visible = false
 layout_mode = 2
 size_flags_vertical = 3
 title = "Texture Layouts"
@@ -261,6 +260,7 @@ theme_override_constants/separation = 12
 
 [node name="AnimationInfo" type="FoldableContainer" parent="HBoxContainer/VSplitContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer/TabContainer"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 title = "Animations"
 metadata/_tab_index = 1
@@ -277,7 +277,6 @@ size_flags_vertical = 3
 [node name="FileDialog" type="FileDialog" parent="."]
 auto_translate_mode = 2
 title = "Open a File"
-auto_translate = false
 file_mode = 0
 access = 2
 filters = PackedStringArray("*.ctr")
@@ -286,7 +285,6 @@ use_native_dialog = true
 [node name="FileDialogISO" type="FileDialog" parent="."]
 auto_translate_mode = 2
 title = "Open a File"
-auto_translate = false
 file_mode = 0
 access = 2
 filters = PackedStringArray("*.bin")
@@ -295,7 +293,6 @@ use_native_dialog = true
 [node name="FileDialogBIG" type="FileDialog" parent="."]
 auto_translate_mode = 2
 title = "Open a File"
-auto_translate = false
 file_mode = 0
 access = 2
 filters = PackedStringArray("*.big")

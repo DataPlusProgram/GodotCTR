@@ -192,11 +192,15 @@ func mapnames():
 func clearentitycache():
 	ENTG.clearEntityCaches(get_tree())
 
-
+func showperf():
+	$/root.add_child(EGLO.createPerformanceInfoOverlay())
 
 func record():
 	if recordScene == null:
-		recordScene = load("res://addons/gameAssetImporter/scenes/inputRecording/recordWindow.tscn").instantiate()
+		recordScene = load("res://addons/gameAssetImporter/scenes/inputRecording/recordWindow/recordWindow.tscn").instantiate()
+	
+	
 	
 		get_tree().get_root().add_child(recordScene)
+		get_tree().set_meta("recorder",recordScene)
 	recordScene.popup_centered()

@@ -213,6 +213,7 @@ static func bytes_to_unsigned_shorts(byte_array: PackedByteArray) -> PackedInt32
 
 static var materialCache : Dictionary[Color,StandardMaterial3D] = {}
 static var sphereMeshCache : Dictionary[float,SphereMesh]
+
 static func drawSphere(node : Node,pos : Vector3,color = Color.WHITE,radius = 0.1):
 	
 	
@@ -829,3 +830,8 @@ static func addKeyToAction(actionName : String,keycode : Key):
 	ev.physical_keycode = keycode
 	InputMap.action_add_event(actionName, ev)
 	
+static func getRecorder(tree : SceneTree) -> Node:
+	if !tree.has_meta("recorder"):
+		return
+	
+	return tree.get_meta("recorder").get_child(0)

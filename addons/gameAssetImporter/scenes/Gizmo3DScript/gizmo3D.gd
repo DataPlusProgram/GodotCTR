@@ -278,7 +278,24 @@ func is_selected(target : Node3D) -> bool:
 
 ## Remove all nodes from the list of nodes currently being edited.
 func clear_selection() -> void:
+	
+
+	for key in _selections.keys():
+		
+		if key == null:
+			_selections.erase(key)
+			continue
+		
+		if !is_instance_valid(_selections[key]):
+			_selections.erase(key)
+			
+	
 	for key in _selections:
+		
+		if !is_instance_valid(key):
+			_selections.erase(key)
+			continue
+		
 		var item = _selections[key]
 		RenderingServer.free_rid(item.sbox_instance)
 		RenderingServer.free_rid(item.sbox_instance_offset)

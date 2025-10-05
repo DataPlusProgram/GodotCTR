@@ -157,7 +157,7 @@ func _on_copy_button_pressed() -> void:
 	copyDir(sourcePath,destPath+root)
 	
 	var dialogue = EGLO.showOption(self,"Copy complete","Ok","Open Directory")
-	dialogue.canceled.connect(OS.shell_open.bind(destPath+root))
+	dialogue.canceled.connect(OS.shell_open.bind(destPath +root))
 	
 	%CopyButton.disabled = false
 

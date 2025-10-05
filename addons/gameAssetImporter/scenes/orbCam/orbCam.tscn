@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://u5ysv8f3nx2g" path="res://addons/gameAssetImporter/scenes/orbCam/orbCam.gd" id="1"]
 
 [node name="orbCam" type="Node3D" groups=["globalCam"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 11)
 script = ExtResource("1")
 zoomMin = 0.0
 controllerSensH = 2.3
@@ -14,5 +13,5 @@ controllerSensV = 2.3
 [node name="v" type="Node3D" parent="h"]
 
 [node name="Camera3D" type="Camera3D" parent="h/v"]
-transform = Transform3D(1, 0, -1.19209e-07, 0, 1, 0, -8.9407e-08, 0, 1, 0, 0, 14)
-far = 3000.0
+transform = Transform3D(1, 0, -1.19209e-07, 0, 1, 0, -8.9407e-08, 0, 1, 0, 0, 0)
+far = 1641.17
